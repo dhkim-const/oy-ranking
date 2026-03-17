@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>올리브영 랭킹 추이 — 리필드 제품</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-date-fns/3.0.0/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
+<style>
+  :root {
+    --purple: #6366f1; --purple-light: rgba(99,102,241,0.12);
+    --rose: #f43f5e; --rose-light: rgba(244,63,94,0.12);
+    --green: #10b981; --bg: #f5f6fa; --card: #fff;
+    --text: #1e1e2e; --sub: #71717a; --border: #e4e4e7;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); }
+
+  .header { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); color:#fff; padding:28px 24px 22px; }
+  .header h1 { font-size:1.35rem; font-weight:700; margin-bottom:4px; }
+  .header p { font-size:.82rem; opacity:.8; }
+
+  .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:16px 20px; }
+  @media(max-width:800px){ .cards{grid-template-columns:repeat(2,1fr);} }
+  .card { background:var(--card); border-radius:10px; padding:14px 16px; box-shadow:0 1px 4px rgba(0,0,0,.05); }
+  .card-label { font-size:.72rem; color:var(--sub); margin-bottom:2px; letter-spacing:.3px; }
+  .card-val { font-size:1.6rem; font-weight:800; }
+  .card-sub { font-size:.7rem; color:var(--sub); margin-top:2px; }
+  .up { color:var(--green); }
+  .purple { color:var(--purple); }
+  .rose { color:var(--rose); }
+
+  .filters { display:flex; gap:8px; padding:4px 20px 12px; flex-wrap:wrap; align-items:center; }
+  .filter-group { display:flex; gap:4px; }
+  .filter-group label { font-size:.72rem; color:var(--sub); margin-right:4px; align-self:center; font-weight:600; }
+  .btn {
+    padding:6px 14px; border-radius:20px; border:1.5px solid var(--border);
+    background:var(--card); font-size:.78rem; cursor:pointer; transition:all .15s;
+    font-weight:500; color:var(--sub);
+  }
+  .btn:hover { border-color:#a5b4fc; color:var(--purple); }
+  .btn.active { background:var(--purple); color:#fff; border-color:var(--purple); }
+  .btn.active-rose { background:var(--rose); color:#fff; border-color:var(--rose); }
+  .divider { width:1px; height:24px; background:var(--border); margin:0 6px; }
+
+  .chart-wrap { background:var(--card); margin:0 20px 20px; border-radius:12px; padding:20px; box-shadow:0 1px 6px rgba(0,0,0,.04); }
+  .chart-title { font-size:.95rem; font-weight:700; margin-bottom:12px; }
+  .chart-box { position:relative; height:440px; }
+  @media(max-width:600px){ .chart-box{height:320px;} }
+
+  .note { text-align:center; font-size:.7rem; color:#a1a1aa; padding:0 20px 24px; line-height:1.6; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏆 올리브영 랭킹 추이 — 리필드 제품</h1>
+  <p>채널 생성일 2025-10-27 ~ 오늘 2026-03-16 · 일별 스냅샷</p>
+</div>
+
+<div class="cards">
+  <div class="card">
+    <div class="card-label">부스터 · 헤어케어</div>
+    <div class="card-val up">3위</div>
+    <div class="card-sub">시작 37위 → 현재 3위 (▲34)</div>
+  </div>
+  <div class="card">
+    <div class="card-label">아이래쉬 · 메이크업</div>
+    <div class="card-val up">4위</div>
+    <div class="card-sub">올영픽 1위 → 45위 → 현재 4위</div>
+  </div>
+  <div class="card">
+    <div class="card-label">부스터 · 전체</div>
+    <div class="card-val purple">40위</div>
+    <div class="card-sub">첫 등장 68위 → 현재 40위</div>
+  </div>
+  <div class="card">
+    <div class="card-label">아이래쉬 · 전체</div>
+    <div class="card-val rose">21위</div>
+    <div class="card-sub">첫 등장 46위 → 현재 21위 (▲25)</div>
+  </div>
+</div>
+
+<div class="filters">
+  <div class="filter-group">
+    <label>제품</label>
+    <button class="btn active" data-filter="product" data-value="all" onclick="setProduct('all',this)">전체</button>
+    <button class="btn" data-filter="product" data-value="booster" onclick="setProduct('booster',this)">부스터</button>
+    <button class="btn" data-filter="product" data-value="eyelash" onclick="setProduct('eyelash',this)">아이래쉬</button>
+  </div>
+  <div class="divider"></div>
+  <div class="filter-group">
+    <label>기간</label>
+    <button class="btn active" data-filter="period" data-value="all" onclick="setPeriod('all',this)">전체</button>
+    <button class="btn" data-filter="period" data-value="2025-10" onclick="setPeriod('2025-10',this)">10월</button>
+    <button class="btn" data-filter="period" data-value="2025-11" onclick="setPeriod('2025-11',this)">11월</button>
+    <button class="btn" data-filter="period" data-value="2025-12" onclick="setPeriod('2025-12',this)">12월</button>
+    <button class="btn" data-filter="period" data-value="2026-01" onclick="setPeriod('2026-01',this)">1월</button>
+    <button class="btn" data-filter="period" data-value="2026-02" onclick="setPeriod('2026-02',this)">2월</button>
+    <button class="btn" data-filter="period" data-value="2026-03" onclick="setPeriod('2026-03',this)">3월</button>
+  </div>
+</div>
+
+<div class="chart-wrap">
+  <div class="chart-title" id="chartTitle">부스터 & 아이래쉬 — 전체 기간</div>
+  <div class="chart-box"><canvas id="mainChart"></canvas></div>
+</div>
+
+<div class="note">
+  ※ 그래프가 아래로 내려갈수록 순위가 좋아지는 것입니다 (1위 = 가장 아래).<br>
+  ※ 데이터 출처: Slack #1132-ct-growth-md-올리브영랭킹
+</div>
+
+<script>
+// ===================== RAW DATA =====================
+const RAW = {
+  boosterHair: {
+    label: '부스터 (헤어케어)',
+    color: '#6366f1',
+    data: [
+      ['2025-10-27',37],['2025-10-28',28],['2025-10-29',27],['2025-10-30',25],['2025-10-31',22],
+      ['2025-11-01',20],['2025-11-03',16],['2025-11-05',13],['2025-11-07',11],['2025-11-10',9],
+      ['2025-11-13',8],['2025-11-15',7],['2025-11-18',7],['2025-11-20',7],['2025-11-23',6],
+      ['2025-11-25',5],['2025-11-28',5],['2025-11-30',5],
+      ['2025-12-03',66],['2025-12-05',34],['2025-12-07',20],['2025-12-09',1],['2025-12-12',3],
+      ['2025-12-15',5],['2025-12-18',8],['2025-12-20',9],['2025-12-23',8],['2025-12-26',7],
+      ['2025-12-29',8],['2025-12-31',9],
+      ['2026-01-05',11],['2026-01-10',13],['2026-01-15',15],['2026-01-20',16],['2026-01-25',18],['2026-01-31',6],
+      ['2026-02-05',15],['2026-02-10',27],['2026-02-15',35],['2026-02-20',55],['2026-02-25',40],
+      ['2026-03-02',14],['2026-03-05',10],['2026-03-08',8],['2026-03-10',6],['2026-03-13',4],['2026-03-16',3]
+    ]
+  },
+  boosterTotal: {
+    label: '부스터 (전체)',
+    color: '#818cf8',
+    dash: [6,3],
+    data: [
+      ['2025-11-20',68],['2025-11-25',65],['2025-11-30',80],
+      ['2025-12-09',12],['2025-12-20',50],['2025-12-31',92],
+      ['2026-01-15',70],['2026-01-31',55],
+      ['2026-02-10',60],['2026-02-20',75],
+      ['2026-03-02',50],['2026-03-10',45],['2026-03-16',40]
+    ]
+  },
+  eyelashMakeup: {
+    label: '아이래쉬 (메이크업)',
+    color: '#f43f5e',
+    data: [
+      ['2025-11-03',1],['2025-11-12',9],['2025-11-14',45],
+      ['2025-11-20',43],['2025-11-23',50],['2025-11-25',55],['2025-11-28',60],['2025-11-30',63],
+      ['2025-12-02',65],['2025-12-05',70],['2025-12-10',75],['2025-12-15',80],['2025-12-20',86],['2025-12-25',85],['2025-12-31',80],
+      ['2026-01-10',75],['2026-01-20',70],['2026-01-31',65],
+      ['2026-02-10',68],['2026-02-20',99],
+      ['2026-03-02',92],['2026-03-05',75],['2026-03-08',50],['2026-03-10',30],['2026-03-13',10],['2026-03-16',4]
+    ]
+  },
+  eyelashTotal: {
+    label: '아이래쉬 (전체)',
+    color: '#fb7185',
+    dash: [6,3],
+    data: [
+      ['2025-11-12',46],['2025-11-13',73],['2025-11-14',100],['2025-11-16',67],['2025-11-22',62],
+      ['2025-12-29',1],['2025-12-30',58],
+      ['2026-01-24',1],['2026-01-25',7],
+      ['2026-02-13',55],
+      ['2026-03-03',5],['2026-03-04',48],['2026-03-16',21]
+    ]
+  }
+};
+
+// ===================== STATE =====================
+let currentProduct = 'all';
+let currentPeriod  = 'all';
+
+// ===================== HELPERS =====================
+function parseDate(str) { return new Date(str + 'T00:00:00'); }
+
+function filterData(series, period) {
+  if (period === 'all') return series;
+  return series.filter(d => d[0].startsWith(period));
+}
+
+// Build unified sorted label array from all visible datasets
+function getUnifiedLabels(keys, period) {
+  const dateSet = new Set();
+  keys.forEach(k => {
+    filterData(RAW[k].data, period).forEach(d => dateSet.add(d[0]));
+  });
+  return Array.from(dateSet).sort();
+}
+
+// Map a dataset's values onto unified labels (null where missing)
+function mapToLabels(seriesData, labels) {
+  const lookup = {};
+  seriesData.forEach(d => { lookup[d[0]] = d[1]; });
+  return labels.map(l => lookup[l] !== undefined ? lookup[l] : null);
+}
+
+function getVisibleKeys() {
+  if (currentProduct === 'booster')  return ['boosterHair','boosterTotal'];
+  if (currentProduct === 'eyelash')  return ['eyelashMakeup','eyelashTotal'];
+  return ['boosterHair','boosterTotal','eyelashMakeup','eyelashTotal'];
+}
+
+function getTitle() {
+  const prod = currentProduct === 'all' ? '부스터 & 아이래쉬' :
+               currentProduct === 'booster' ? '부스터' : '아이래쉬';
+  const monthNames = {'all':'전체 기간','2025-10':'2025년 10월','2025-11':'2025년 11월','2025-12':'2025년 12월',
+                      '2026-01':'2026년 1월','2026-02':'2026년 2월','2026-03':'2026년 3월'};
+  return prod + ' — ' + (monthNames[currentPeriod] || currentPeriod);
+}
+
+function computeYMax(keys, period) {
+  let maxVal = 0;
+  keys.forEach(k => {
+    filterData(RAW[k].data, period).forEach(d => { if(d[1]>maxVal) maxVal=d[1]; });
+  });
+  return Math.min(Math.ceil((maxVal+10)/10)*10, 110);
+}
+
+function formatLabel(dateStr) {
+  const parts = dateStr.split('-');
+  return parts[1] + '/' + parts[2];
+}
+
+// ===================== CHART =====================
+const ctx = document.getElementById('mainChart').getContext('2d');
+let chart;
+
+function renderChart() {
+  const keys = getVisibleKeys();
+  const labels = getUnifiedLabels(keys, currentPeriod);
+
+  // Build datasets mapped to unified labels
+  const datasets = [];
+  keys.forEach(k => {
+    const s = RAW[k];
+    const filtered = filterData(s.data, currentPeriod);
+    if (filtered.length === 0) return;
+
+    const values = mapToLabels(filtered, labels);
+
+    datasets.push({
+      label: s.label,
+      data: values,
+      borderColor: s.color,
+      backgroundColor: s.color + '10',
+      borderWidth: 2.5,
+      borderDash: s.dash || [],
+      pointRadius: labels.length > 35 ? 2.5 : 4,
+      pointHoverRadius: 7,
+      pointBackgroundColor: s.color,
+      pointBorderColor: '#fff',
+      pointBorderWidth: 1.5,
+      fill: true,
+      tension: 0.3,
+      spanGaps: true
+    });
+  });
+
+  document.getElementById('chartTitle').textContent = getTitle();
+  const yMax = computeYMax(keys, currentPeriod);
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: datasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode:'index', intersect:false },
+      plugins: {
+        legend: {
+          position:'top',
+          labels:{ usePointStyle:true, pointStyle:'circle', padding:16, font:{size:12} }
+        },
+        tooltip: {
+          backgroundColor:'rgba(30,30,46,.92)', titleFont:{size:13}, bodyFont:{size:12},
+          padding:12, cornerRadius:8,
+          callbacks: {
+            title: function(items) { return items[0] ? formatLabel(items[0].label) : ''; },
+            label: function(ctx) {
+              if (ctx.parsed.y === null) return null;
+              return ctx.dataset.label + ': ' + ctx.parsed.y + '위';
+            }
+          }
+        },
+        annotation: {
+          annotations: {
+            top10: {
+              type:'line', yMin:10, yMax:10,
+              borderColor:'rgba(16,185,129,.35)', borderWidth:1.5, borderDash:[5,4],
+              label:{ display:true, content:'TOP 10', position:'start',
+                      backgroundColor:'rgba(16,185,129,.12)', color:'#10b981',
+                      font:{size:10,weight:'bold'}, padding:3 }
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          reverse: false,
+          min: 0,
+          max: yMax,
+          title:{ display:true, text:'순위 (아래로 갈수록 좋음 ↓)', font:{size:11}, color:'#a1a1aa' },
+          grid:{ color:'rgba(0,0,0,.04)' },
+          ticks:{ callback: function(v){ return v + '위'; }, font:{size:10}, color:'#71717a' }
+        },
+        x: {
+          title:{ display:true, text:'날짜', font:{size:11}, color:'#a1a1aa' },
+          grid:{ display:false },
+          ticks:{
+            maxRotation:50, minRotation:30, font:{size:9}, color:'#71717a',
+            callback: function(val, i) {
+              const lbl = this.getLabelForValue(i);
+              if (!lbl) return '';
+              return formatLabel(lbl);
+            },
+            autoSkip: true,
+            maxTicksLimit: 25
+          }
+        }
+      }
+    }
+  });
+}
+
+// ===================== FILTER HANDLERS =====================
+function clearActive(filterType) {
+  document.querySelectorAll('.btn[data-filter="'+filterType+'"]').forEach(function(b) {
+    b.classList.remove('active','active-rose');
+  });
+}
+
+function setProduct(val, el) {
+  currentProduct = val;
+  clearActive('product');
+  el.classList.add(val==='eyelash' ? 'active-rose' : 'active');
+  renderChart();
+}
+
+function setPeriod(val, el) {
+  currentPeriod = val;
+  clearActive('period');
+  el.classList.add('active');
+  renderChart();
+}
+
+// ===================== INIT =====================
+renderChart();
+</script>
+</body>
+</html>
