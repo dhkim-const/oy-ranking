@@ -5,408 +5,234 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>올리브영 랭킹 추이 — 리필드 제품</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-date-fns/3.0.0/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
 <style>
-  :root {
-    --purple: #6366f1; --purple-light: rgba(99,102,241,0.12);
-    --rose: #f43f5e; --rose-light: rgba(244,63,94,0.12);
-    --green: #10b981; --bg: #f5f6fa; --card: #fff;
-    --text: #1e1e2e; --sub: #71717a; --border: #e4e4e7;
-  }
+  :root { --purple:#6366f1; --rose:#f43f5e; --green:#10b981; --amber:#f59e0b; --bg:#f5f6fa; --card:#fff; --text:#1e1e2e; --sub:#71717a; --border:#e4e4e7; }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:-apple-system,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); }
-
-  .header { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); color:#fff; padding:28px 24px 22px; }
-  .header h1 { font-size:1.35rem; font-weight:700; margin-bottom:4px; }
-  .header p { font-size:.82rem; opacity:.8; }
-  .header .badge { display:inline-block; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); border-radius:20px; font-size:.72rem; padding:3px 10px; margin-top:8px; }
-
-  .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:16px 20px; }
+  .header { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); color:#fff; padding:24px 24px 20px; }
+  .header h1 { font-size:1.3rem; font-weight:700; margin-bottom:4px; }
+  .header p  { font-size:.8rem; opacity:.8; }
+  .live-bar { display:flex; align-items:center; gap:10px; justify-content:space-between; background:#fff; border-bottom:1px solid var(--border); padding:10px 20px; font-size:.78rem; flex-wrap:wrap; }
+  .live-bar .left { display:flex; align-items:center; gap:8px; }
+  .dot { width:8px; height:8px; border-radius:50%; background:var(--green); flex-shrink:0; animation:pulse 2s infinite; }
+  .dot.loading { background:var(--amber); }
+  .dot.error   { background:var(--rose); animation:none; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .live-bar button { padding:5px 14px; border-radius:16px; border:1.5px solid var(--purple); background:#fff; color:var(--purple); font-size:.75rem; font-weight:600; cursor:pointer; transition:all .15s; }
+  .live-bar button:hover { background:var(--purple); color:#fff; }
+  .live-bar button:disabled { opacity:.4; cursor:not-allowed; }
+  .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:14px 20px; }
   @media(max-width:800px){ .cards{grid-template-columns:repeat(2,1fr);} }
   .card { background:var(--card); border-radius:10px; padding:14px 16px; box-shadow:0 1px 4px rgba(0,0,0,.05); }
-  .card-label { font-size:.72rem; color:var(--sub); margin-bottom:2px; letter-spacing:.3px; }
-  .card-val { font-size:1.6rem; font-weight:800; }
-  .card-sub { font-size:.7rem; color:var(--sub); margin-top:2px; }
-  .up { color:var(--green); }
-  .purple { color:var(--purple); }
-  .rose { color:var(--rose); }
-
-  .filters { display:flex; gap:8px; padding:4px 20px 12px; flex-wrap:wrap; align-items:center; }
-  .filter-group { display:flex; gap:4px; }
-  .filter-group label { font-size:.72rem; color:var(--sub); margin-right:4px; align-self:center; font-weight:600; }
-  .btn {
-    padding:6px 14px; border-radius:20px; border:1.5px solid var(--border);
-    background:var(--card); font-size:.78rem; cursor:pointer; transition:all .15s;
-    font-weight:500; color:var(--sub);
-  }
+  .card-label { font-size:.72rem; color:var(--sub); margin-bottom:2px; }
+  .card-val   { font-size:1.55rem; font-weight:800; }
+  .card-sub   { font-size:.7rem; color:var(--sub); margin-top:2px; }
+  .up{color:var(--green);} .clr-purple{color:var(--purple);} .clr-rose{color:var(--rose);}
+  .filters { display:flex; gap:8px; padding:4px 20px 10px; flex-wrap:wrap; align-items:center; }
+  .fg { display:flex; gap:4px; align-items:center; }
+  .fg label { font-size:.72rem; color:var(--sub); margin-right:2px; font-weight:600; }
+  .btn { padding:5px 13px; border-radius:18px; border:1.5px solid var(--border); background:var(--card); font-size:.76rem; cursor:pointer; font-weight:500; color:var(--sub); transition:all .15s; }
   .btn:hover { border-color:#a5b4fc; color:var(--purple); }
   .btn.active { background:var(--purple); color:#fff; border-color:var(--purple); }
   .btn.active-rose { background:var(--rose); color:#fff; border-color:var(--rose); }
-  .divider { width:1px; height:24px; background:var(--border); margin:0 6px; }
-
-  .chart-wrap { background:var(--card); margin:0 20px 20px; border-radius:12px; padding:20px; box-shadow:0 1px 6px rgba(0,0,0,.04); }
-  .chart-title { font-size:.95rem; font-weight:700; margin-bottom:12px; }
-  .chart-box { position:relative; height:440px; }
-  @media(max-width:600px){ .chart-box{height:320px;} }
-
-  .note { text-align:center; font-size:.7rem; color:#a1a1aa; padding:0 20px 24px; line-height:1.6; }
-  
-  .slack-info { background:#fff; border:1px solid #e4e4e7; border-left:3px solid #10b981; border-radius:8px; margin:0 20px 16px; padding:10px 14px; font-size:.75rem; color:#3f3f46; display:flex; align-items:center; gap:8px; }
-  .slack-info .dot { width:8px; height:8px; border-radius:50%; background:#10b981; flex-shrink:0; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .divider { width:1px; height:22px; background:var(--border); margin:0 4px; }
+  .chart-wrap { background:var(--card); margin:0 20px 20px; border-radius:12px; padding:18px 20px; box-shadow:0 1px 6px rgba(0,0,0,.04); }
+  .chart-title { font-size:.92rem; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .chart-box { position:relative; height:420px; }
+  @media(max-width:600px){ .chart-box{height:300px;} }
+  .note { text-align:center; font-size:.7rem; color:#a1a1aa; padding:0 20px 24px; line-height:1.7; }
+  .toast { position:fixed; bottom:24px; right:24px; background:#1e1e2e; color:#fff; padding:10px 18px; border-radius:10px; font-size:.8rem; opacity:0; transition:opacity .3s; pointer-events:none; z-index:999; }
+  .toast.show { opacity:1; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1>🏆 올리브영 랭킹 추이 — 리필드 제품</h1>
-  <p>채널 생성일 2025-10-27 ~ 오늘 2026-03-17 · 일별 스냅샷</p>
-  <div class="badge">✅ Slack #1132-ct-growth-md-올리브영랭킹 데이터 반영 완료</div>
+  <p>채널 생성일 2025-10-27 ~ 현재 · Slack 자동 연동</p>
 </div>
 
-<div class="slack-info">
-  <div class="dot"></div>
-  <span>Slack 최신 데이터 반영 · 마지막 업데이트: <strong>2026-03-17 17:08 KST</strong> · 부스터 헤어케어 12위 / 아이래쉬 메이크업 52위</span>
+<div class="live-bar">
+  <div class="left">
+    <div class="dot loading" id="statusDot"></div>
+    <span id="statusText">슬랙 최신 데이터 확인 중…</span>
+  </div>
+  <button id="refreshBtn" onclick="fetchSlackData()" disabled>🔄 지금 업데이트</button>
 </div>
 
 <div class="cards">
-  <div class="card">
-    <div class="card-label">부스터 · 헤어케어</div>
-    <div class="card-val up">12위</div>
-    <div class="card-sub">시작 37위 → 최저 1위 → 현재 12위</div>
-  </div>
-  <div class="card">
-    <div class="card-label">아이래쉬 · 메이크업</div>
-    <div class="card-val up">52위</div>
-    <div class="card-sub">최저 1위(올영픽) → 3/16 4위 → 현재 52위</div>
-  </div>
-  <div class="card">
-    <div class="card-label">부스터 · 전체</div>
-    <div class="card-val purple">—</div>
-    <div class="card-sub">최근 전체 순위 미집계</div>
-  </div>
-  <div class="card">
-    <div class="card-label">아이래쉬 · 전체</div>
-    <div class="card-val rose">45위</div>
-    <div class="card-sub">3/16 오후 기준 45위 확인</div>
-  </div>
+  <div class="card"><div class="card-label">부스터 · 헤어케어</div><div class="card-val up" id="c1">—</div><div class="card-sub" id="c1s">로딩 중…</div></div>
+  <div class="card"><div class="card-label">아이래쉬 · 메이크업</div><div class="card-val up" id="c2">—</div><div class="card-sub" id="c2s">로딩 중…</div></div>
+  <div class="card"><div class="card-label">부스터 · 전체</div><div class="card-val clr-purple" id="c3">—</div><div class="card-sub" id="c3s">로딩 중…</div></div>
+  <div class="card"><div class="card-label">아이래쉬 · 전체</div><div class="card-val clr-rose" id="c4">—</div><div class="card-sub" id="c4s">로딩 중…</div></div>
 </div>
 
 <div class="filters">
-  <div class="filter-group">
+  <div class="fg">
     <label>제품</label>
-    <button class="btn active" data-filter="product" data-value="all" onclick="setProduct('all',this)">전체</button>
-    <button class="btn" data-filter="product" data-value="booster" onclick="setProduct('booster',this)">부스터</button>
-    <button class="btn" data-filter="product" data-value="eyelash" onclick="setProduct('eyelash',this)">아이래쉬</button>
+    <button class="btn active" data-f="product" onclick="setProduct('all',this)">전체</button>
+    <button class="btn" data-f="product" onclick="setProduct('booster',this)">부스터</button>
+    <button class="btn" data-f="product" onclick="setProduct('eyelash',this)">아이래쉬</button>
   </div>
   <div class="divider"></div>
-  <div class="filter-group">
+  <div class="fg">
     <label>기간</label>
-    <button class="btn active" data-filter="period" data-value="all" onclick="setPeriod('all',this)">전체</button>
-    <button class="btn" data-filter="period" data-value="2025-10" onclick="setPeriod('2025-10',this)">10월</button>
-    <button class="btn" data-filter="period" data-value="2025-11" onclick="setPeriod('2025-11',this)">11월</button>
-    <button class="btn" data-filter="period" data-value="2025-12" onclick="setPeriod('2025-12',this)">12월</button>
-    <button class="btn" data-filter="period" data-value="2026-01" onclick="setPeriod('2026-01',this)">1월</button>
-    <button class="btn" data-filter="period" data-value="2026-02" onclick="setPeriod('2026-02',this)">2월</button>
-    <button class="btn" data-filter="period" data-value="2026-03" onclick="setPeriod('2026-03',this)">3월</button>
+    <button class="btn active" data-f="period" onclick="setPeriod('all',this)">전체</button>
+    <button class="btn" data-f="period" onclick="setPeriod('2025-10',this)">10월</button>
+    <button class="btn" data-f="period" onclick="setPeriod('2025-11',this)">11월</button>
+    <button class="btn" data-f="period" onclick="setPeriod('2025-12',this)">12월</button>
+    <button class="btn" data-f="period" onclick="setPeriod('2026-01',this)">1월</button>
+    <button class="btn" data-f="period" onclick="setPeriod('2026-02',this)">2월</button>
+    <button class="btn" data-f="period" onclick="setPeriod('2026-03',this)">3월</button>
   </div>
 </div>
 
 <div class="chart-wrap">
-  <div class="chart-title" id="chartTitle">부스터 & 아이래쉬 — 전체 기간</div>
+  <div class="chart-title">
+    <span id="chartTitle">부스터 &amp; 아이래쉬 — 전체 기간</span>
+    <span id="liveTag" style="display:none;font-size:.68rem;background:#dcfce7;color:#16a34a;padding:2px 8px;border-radius:12px;font-weight:600;">● LIVE</span>
+  </div>
   <div class="chart-box"><canvas id="mainChart"></canvas></div>
 </div>
 
 <div class="note">
-  ※ 그래프가 아래로 내려갈수록 순위가 좋아지는 것입니다 (1위 = 가장 아래).<br>
-  ※ 데이터 출처: Slack #1132-ct-growth-md-올리브영랭킹 · 3월 이후 시간별 스냅샷에서 일별 대표값(낮 12~15시) 추출
+  ※ 그래프가 아래로 내려갈수록 순위가 좋아지는 것입니다 (1위 = 가장 아래)<br>
+  ※ 3월 데이터: 슬랙 시간별 스냅샷 낮 10~14시 기준 일별 대표값 · 파일 열 때 자동 최신화<br>
+  ※ 데이터 출처: Slack #1132-ct-growth-md-올리브영랭킹
 </div>
+<div class="toast" id="toast"></div>
 
 <script>
-// ===================== RAW DATA =====================
-// 기존 데이터 + Slack에서 실시간 업데이트된 3월 데이터 반영
-const RAW = {
-  boosterHair: {
-    label: '부스터 (헤어케어)',
-    color: '#6366f1',
-    data: [
-      ['2025-10-27',37],['2025-10-28',28],['2025-10-29',27],['2025-10-30',25],['2025-10-31',22],
-      ['2025-11-01',20],['2025-11-03',16],['2025-11-05',13],['2025-11-07',11],['2025-11-10',9],
-      ['2025-11-13',8],['2025-11-15',7],['2025-11-18',7],['2025-11-20',7],['2025-11-23',6],
-      ['2025-11-25',5],['2025-11-28',5],['2025-11-30',5],
-      ['2025-12-03',66],['2025-12-05',34],['2025-12-07',20],['2025-12-09',1],['2025-12-12',3],
-      ['2025-12-15',5],['2025-12-18',8],['2025-12-20',9],['2025-12-23',8],['2025-12-26',7],
-      ['2025-12-29',8],['2025-12-31',9],
-      ['2026-01-05',11],['2026-01-10',13],['2026-01-15',15],['2026-01-20',16],['2026-01-25',18],['2026-01-31',6],
-      ['2026-02-05',15],['2026-02-10',27],['2026-02-15',35],['2026-02-20',55],['2026-02-25',40],
-      // ✅ Slack 실시간 데이터 반영 (3월 — 낮 12~15시 기준 일별 대표값)
-      ['2026-03-02',14],['2026-03-05',10],['2026-03-08',8],['2026-03-10',6],['2026-03-13',4],
-      ['2026-03-14',3],  // Slack: 12시 4위, 13시 3위 → 3위
-      ['2026-03-15',6],  // Slack: 12시 6위
-      ['2026-03-16',3],  // Slack: 12시 3위 → 3월 16일 최고
-      ['2026-03-17',12]  // Slack: 17시 12위 (오늘 최신)
-    ]
-  },
-  boosterTotal: {
-    label: '부스터 (전체)',
-    color: '#818cf8',
-    dash: [6,3],
-    data: [
-      ['2025-11-20',68],['2025-11-25',65],['2025-11-30',80],
-      ['2025-12-09',12],['2025-12-20',50],['2025-12-31',92],
-      ['2026-01-15',70],['2026-01-31',55],
-      ['2026-02-10',60],['2026-02-20',75],
-      ['2026-03-02',50],['2026-03-10',45],
-      // ✅ Slack 반영 — 전체 카테고리는 일부 메시지에만 집계됨
-      ['2026-03-14',88], // Slack 14:08 88위
-      ['2026-03-15',76], // Slack 12:08 76위
-      ['2026-03-16',45]  // Slack 15:09 94위 → 오후 향상 45위
-    ]
-  },
-  eyelashMakeup: {
-    label: '아이래쉬 (메이크업)',
-    color: '#f43f5e',
-    data: [
-      ['2025-11-03',1],['2025-11-12',9],['2025-11-14',45],
-      ['2025-11-20',43],['2025-11-23',50],['2025-11-25',55],['2025-11-28',60],['2025-11-30',63],
-      ['2025-12-02',65],['2025-12-05',70],['2025-12-10',75],['2025-12-15',80],['2025-12-20',86],['2025-12-25',85],['2025-12-31',80],
-      ['2026-01-10',75],['2026-01-20',70],['2026-01-31',65],
-      ['2026-02-10',68],['2026-02-20',99],
-      ['2026-03-02',92],['2026-03-05',75],['2026-03-08',50],['2026-03-10',30],['2026-03-13',10],
-      // ✅ Slack 실시간 데이터 반영
-      ['2026-03-14',80], // Slack: 12시 96위 → 14시 80위 → 대표 80위
-      ['2026-03-15',55], // Slack: 12시 55위
-      ['2026-03-16',8],  // Slack: 15시 8위 → 급상승!
-      ['2026-03-17',52]  // Slack: 17시 52위 (오늘 최신)
-    ]
-  },
-  eyelashTotal: {
-    label: '아이래쉬 (전체)',
-    color: '#fb7185',
-    dash: [6,3],
-    data: [
-      ['2025-11-12',46],['2025-11-13',73],['2025-11-14',100],['2025-11-16',67],['2025-11-22',62],
-      ['2025-12-29',1],['2025-12-30',58],
-      ['2026-01-24',1],['2026-01-25',7],
-      ['2026-02-13',55],
-      // ✅ Slack 실시간 데이터 반영
-      ['2026-03-03',5],['2026-03-04',48],
-      ['2026-03-11',21], // Slack: 11시 21위
-      ['2026-03-13',21], // Slack: 13시 34위
-      ['2026-03-14',88], // Slack: 14시 88위
-      ['2026-03-15',76], // Slack: 12시 76위
-      ['2026-03-16',45], // Slack: 15시 45위
-      ['2026-03-17',null] // 금일 전체 미집계
-    ]
-  }
+const BASE = {
+  boosterHair: { label:'부스터 (헤어케어)', color:'#6366f1', data:[
+    ['2025-10-27',37],['2025-10-28',28],['2025-10-29',27],['2025-10-30',25],['2025-10-31',22],
+    ['2025-11-01',20],['2025-11-03',16],['2025-11-05',13],['2025-11-07',11],['2025-11-10',9],
+    ['2025-11-13',8],['2025-11-15',7],['2025-11-18',7],['2025-11-20',7],['2025-11-23',6],
+    ['2025-11-25',5],['2025-11-28',5],['2025-11-30',5],
+    ['2025-12-03',66],['2025-12-05',34],['2025-12-07',20],['2025-12-09',1],['2025-12-12',3],
+    ['2025-12-15',5],['2025-12-18',8],['2025-12-20',9],['2025-12-23',8],['2025-12-26',7],['2025-12-29',8],['2025-12-31',9],
+    ['2026-01-05',11],['2026-01-10',13],['2026-01-15',15],['2026-01-20',16],['2026-01-25',18],['2026-01-31',6],
+    ['2026-02-05',15],['2026-02-10',27],['2026-02-15',35],['2026-02-20',55],['2026-02-25',40]
+  ]},
+  boosterTotal: { label:'부스터 (전체)', color:'#818cf8', dash:[6,3], data:[
+    ['2025-11-20',68],['2025-11-25',65],['2025-11-30',80],
+    ['2025-12-09',12],['2025-12-20',50],['2025-12-31',92],
+    ['2026-01-15',70],['2026-01-31',55],['2026-02-10',60],['2026-02-20',75]
+  ]},
+  eyelashMakeup: { label:'아이래쉬 (메이크업)', color:'#f43f5e', data:[
+    ['2025-11-03',1],['2025-11-12',9],['2025-11-14',45],
+    ['2025-11-20',43],['2025-11-23',50],['2025-11-25',55],['2025-11-28',60],['2025-11-30',63],
+    ['2025-12-02',65],['2025-12-05',70],['2025-12-10',75],['2025-12-15',80],['2025-12-20',86],['2025-12-25',85],['2025-12-31',80],
+    ['2026-01-10',75],['2026-01-20',70],['2026-01-31',65],['2026-02-10',68],['2026-02-20',99]
+  ]},
+  eyelashTotal: { label:'아이래쉬 (전체)', color:'#fb7185', dash:[6,3], data:[
+    ['2025-11-12',46],['2025-11-13',73],['2025-11-14',100],['2025-11-16',67],['2025-11-22',62],
+    ['2025-12-29',1],['2025-12-30',58],['2026-01-24',1],['2026-01-25',7],['2026-02-13',55]
+  ]}
 };
 
-// ===================== STATE =====================
-let currentProduct = 'all';
-let currentPeriod  = 'all';
+// 수동 수집 최신 데이터 (fallback) — 2026-03-18 11:08 KST 기준
+const SLACK_SAVED = {
+  boosterHair:  [['2026-03-10',7],['2026-03-11',3],['2026-03-12',9],['2026-03-13',7],['2026-03-14',4],['2026-03-15',6],['2026-03-16',3],['2026-03-17',7],['2026-03-18',3]],
+  boosterTotal: [['2026-03-10',44],['2026-03-11',48],['2026-03-12',93],['2026-03-13',63],['2026-03-14',65],['2026-03-15',94],['2026-03-16',52],['2026-03-17',98],['2026-03-18',57]],
+  eyelashMakeup:[['2026-03-10',97],['2026-03-12',52],['2026-03-13',69],['2026-03-14',96],['2026-03-15',55],['2026-03-16',7],['2026-03-17',5],['2026-03-18',6]],
+  eyelashTotal: [['2026-03-12',93],['2026-03-13',63],['2026-03-14',44],['2026-03-15',45],['2026-03-16',31],['2026-03-17',25],['2026-03-18',28]]
+};
 
-// ===================== HELPERS =====================
-function parseDate(str) { return new Date(str + 'T00:00:00'); }
-
-function filterData(series, period) {
-  if (period === 'all') return series.filter(d => d[1] !== null);
-  return series.filter(d => d[0].startsWith(period) && d[1] !== null);
-}
-
-function getUnifiedLabels(keys, period) {
-  const dateSet = new Set();
-  keys.forEach(k => {
-    filterData(RAW[k].data, period).forEach(d => dateSet.add(d[0]));
-  });
-  return Array.from(dateSet).sort();
-}
-
-function mapToLabels(seriesData, labels) {
-  const lookup = {};
-  seriesData.forEach(d => { if(d[1] !== null) lookup[d[0]] = d[1]; });
-  return labels.map(l => lookup[l] !== undefined ? lookup[l] : null);
-}
-
-function getVisibleKeys() {
-  if (currentProduct === 'booster')  return ['boosterHair','boosterTotal'];
-  if (currentProduct === 'eyelash')  return ['eyelashMakeup','eyelashTotal'];
-  return ['boosterHair','boosterTotal','eyelashMakeup','eyelashTotal'];
-}
-
-function getTitle() {
-  const prod = currentProduct === 'all' ? '부스터 & 아이래쉬' :
-               currentProduct === 'booster' ? '부스터' : '아이래쉬';
-  const monthNames = {'all':'전체 기간','2025-10':'2025년 10월','2025-11':'2025년 11월','2025-12':'2025년 12월',
-                      '2026-01':'2026년 1월','2026-02':'2026년 2월','2026-03':'2026년 3월'};
-  return prod + ' — ' + (monthNames[currentPeriod] || currentPeriod);
-}
-
-function computeYMax(keys, period) {
-  let maxVal = 0;
-  keys.forEach(k => {
-    filterData(RAW[k].data, period).forEach(d => { if(d[1]>maxVal) maxVal=d[1]; });
-  });
-  return Math.min(Math.ceil((maxVal+10)/10)*10, 110);
-}
-
-function formatLabel(dateStr) {
-  const parts = dateStr.split('-');
-  return parts[1] + '/' + parts[2];
-}
-
-// ===================== CHART =====================
-const ctx = document.getElementById('mainChart').getContext('2d');
-let chart;
-
-function renderChart() {
-  const keys = getVisibleKeys();
-  const labels = getUnifiedLabels(keys, currentPeriod);
-
-  const datasets = [];
-  keys.forEach(k => {
-    const s = RAW[k];
-    const filtered = filterData(s.data, currentPeriod);
-    if (filtered.length === 0) return;
-
-    const values = mapToLabels(filtered, labels);
-
-    datasets.push({
-      label: s.label,
-      data: values,
-      borderColor: s.color,
-      backgroundColor: s.color + '10',
-      borderWidth: 2.5,
-      borderDash: s.dash || [],
-      pointRadius: labels.length > 35 ? 2.5 : 4,
-      pointHoverRadius: 7,
-      pointBackgroundColor: s.color,
-      pointBorderColor: '#fff',
-      pointBorderWidth: 1.5,
-      fill: true,
-      tension: 0.3,
-      spanGaps: true
+async function fetchSlackData() {
+  const btn=document.getElementById('refreshBtn'), dot=document.getElementById('statusDot'), txt=document.getElementById('statusText');
+  btn.disabled=true; dot.className='dot loading'; txt.textContent='슬랙 최신 데이터 불러오는 중…';
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:2000,
+        system:`슬랙 채널 C09P8JZ4UQ1의 최근 7일 올리브영 랭킹 메시지를 읽고 JSON만 반환:
+{"boosterHair":[["YYYY-MM-DD",순위],...],"boosterTotal":[...],"eyelashMakeup":[...],"eyelashTotal":[...]}
+날짜별 낮 10~14시 중 가장 좋은 순위 1개. 헤어케어→boosterHair, 메이크업→eyelashMakeup, 전체 부스터→boosterTotal, 전체 아이래쉬→eyelashTotal. 데이터 없으면 제외.`,
+        messages:[{role:'user',content:'슬랙 C09P8JZ4UQ1 최근 7일 랭킹 JSON'}],
+        mcp_servers:[{type:'url',url:'https://mcp.slack.com/mcp',name:'slack'}]
+      })
     });
-  });
-
-  document.getElementById('chartTitle').textContent = getTitle();
-  const yMax = computeYMax(keys, currentPeriod);
-
-  if (chart) chart.destroy();
-
-  // 최신 데이터 포인트 강조 annotation
-  const todayLabel = '2026-03-17';
-  const todayIdx = labels.indexOf(todayLabel);
-
-  const annotations = {
-    top10: {
-      type:'line', yMin:10, yMax:10,
-      borderColor:'rgba(16,185,129,.35)', borderWidth:1.5, borderDash:[5,4],
-      label:{ display:true, content:'TOP 10', position:'start',
-              backgroundColor:'rgba(16,185,129,.12)', color:'#10b981',
-              font:{size:10,weight:'bold'}, padding:3 }
-    }
-  };
-
-  if (todayIdx >= 0) {
-    annotations.today = {
-      type: 'line',
-      xMin: todayIdx,
-      xMax: todayIdx,
-      borderColor: 'rgba(245,158,11,0.5)',
-      borderWidth: 1.5,
-      borderDash: [4,4],
-      label: {
-        display: true,
-        content: '오늘(Slack)',
-        position: 'start',
-        backgroundColor: 'rgba(245,158,11,0.1)',
-        color: '#d97706',
-        font: { size: 10, weight: 'bold' },
-        padding: 3
-      }
-    };
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message);
+    const txt2 = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const m = txt2.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('no json');
+    const parsed = JSON.parse(m[0]);
+    mergeAndRender(parsed);
+    const now = new Date().toLocaleString('ko-KR',{timeZone:'Asia/Seoul'});
+    dot.className='dot'; txt.innerHTML=`✅ 슬랙 실시간 업데이트 완료 · <strong>${now}</strong>`;
+    document.getElementById('liveTag').style.display='inline';
+    showToast('✅ 슬랙 최신 데이터 반영 완료!');
+  } catch(e) {
+    mergeAndRender(SLACK_SAVED);
+    dot.className='dot'; txt.innerHTML=`📦 저장된 데이터 표시 중 · 마지막 수동 반영: <strong>2026-03-18 11:08 KST</strong>`;
+    showToast('저장된 최신 데이터로 표시합니다');
   }
-
-  chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: datasets
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode:'index', intersect:false },
-      plugins: {
-        legend: {
-          position:'top',
-          labels:{ usePointStyle:true, pointStyle:'circle', padding:16, font:{size:12} }
-        },
-        tooltip: {
-          backgroundColor:'rgba(30,30,46,.92)', titleFont:{size:13}, bodyFont:{size:12},
-          padding:12, cornerRadius:8,
-          callbacks: {
-            title: function(items) { return items[0] ? formatLabel(items[0].label) : ''; },
-            label: function(ctx) {
-              if (ctx.parsed.y === null) return null;
-              return ctx.dataset.label + ': ' + ctx.parsed.y + '위';
-            }
-          }
-        },
-        annotation: { annotations }
-      },
-      scales: {
-        y: {
-          reverse: false,
-          min: 0,
-          max: yMax,
-          title:{ display:true, text:'순위 (아래로 갈수록 좋음 ↓)', font:{size:11}, color:'#a1a1aa' },
-          grid:{ color:'rgba(0,0,0,.04)' },
-          ticks:{ callback: function(v){ return v + '위'; }, font:{size:10}, color:'#71717a' }
-        },
-        x: {
-          title:{ display:true, text:'날짜', font:{size:11}, color:'#a1a1aa' },
-          grid:{ display:false },
-          ticks:{
-            maxRotation:50, minRotation:30, font:{size:9}, color:'#71717a',
-            callback: function(val, i) {
-              const lbl = this.getLabelForValue(i);
-              if (!lbl) return '';
-              return formatLabel(lbl);
-            },
-            autoSkip: true,
-            maxTicksLimit: 25
-          }
-        }
-      }
-    }
-  });
+  btn.disabled=false;
 }
 
-// ===================== FILTER HANDLERS =====================
-function clearActive(filterType) {
-  document.querySelectorAll('.btn[data-filter="'+filterType+'"]').forEach(function(b) {
-    b.classList.remove('active','active-rose');
-  });
-}
+let _RAW=null, curProduct='all', curPeriod='all';
 
-function setProduct(val, el) {
-  currentProduct = val;
-  clearActive('product');
-  el.classList.add(val==='eyelash' ? 'active-rose' : 'active');
+function mergeAndRender(slackData) {
+  _RAW={};
+  ['boosterHair','boosterTotal','eyelashMakeup','eyelashTotal'].forEach(k=>{
+    const base=[...BASE[k].data];
+    const slack=(slackData[k]||[]).filter(d=>d[1]!==null);
+    const slackDates=new Set(slack.map(d=>d[0]));
+    const merged=base.filter(d=>!slackDates.has(d[0])).concat(slack);
+    merged.sort((a,b)=>a[0].localeCompare(b[0]));
+    _RAW[k]={...BASE[k],data:merged};
+  });
+  updateCards(slackData);
   renderChart();
 }
 
-function setPeriod(val, el) {
-  currentPeriod = val;
-  clearActive('period');
-  el.classList.add('active');
-  renderChart();
+function updateCards(sd) {
+  [['boosterHair','c1','c1s'],['eyelashMakeup','c2','c2s'],['boosterTotal','c3','c3s'],['eyelashTotal','c4','c4s']].forEach(([k,id,sid])=>{
+    const data=(sd[k]||[]).filter(d=>d[1]!==null);
+    if(!data.length) return;
+    const latest=data[data.length-1];
+    const startRank=_RAW[k].data.find(d=>d[1]!==null)?.[1]??latest[1];
+    const diff=startRank-latest[1];
+    document.getElementById(id).textContent=latest[1]+'위';
+    document.getElementById(sid).textContent=`${latest[0].slice(5).replace('-','/')} 기준 · ${diff>=0?'▲':'▼'}${Math.abs(diff)} (시작 ${startRank}위→현재 ${latest[1]}위)`;
+  });
 }
 
-// ===================== INIT =====================
-renderChart();
+let chart;
+function fd(arr,period){ return period==='all'?arr.filter(d=>d[1]!==null):arr.filter(d=>d[0].startsWith(period)&&d[1]!==null); }
+function getLabels(keys,period){ const s=new Set(); keys.forEach(k=>fd(_RAW[k].data,period).forEach(d=>s.add(d[0]))); return [...s].sort(); }
+
+function renderChart(){
+  if(!_RAW) return;
+  const vk=curProduct==='booster'?['boosterHair','boosterTotal']:curProduct==='eyelash'?['eyelashMakeup','eyelashTotal']:['boosterHair','boosterTotal','eyelashMakeup','eyelashTotal'];
+  const labels=getLabels(vk,curPeriod);
+  const datasets=vk.map(k=>{
+    const s=_RAW[k], lookup={};
+    fd(s.data,curPeriod).forEach(d=>{lookup[d[0]]=d[1];});
+    return {label:s.label,data:labels.map(l=>lookup[l]??null),borderColor:s.color,backgroundColor:s.color+'10',borderWidth:2.5,borderDash:s.dash||[],pointRadius:labels.length>40?2:4,pointHoverRadius:7,pointBackgroundColor:s.color,pointBorderColor:'#fff',pointBorderWidth:1.5,fill:true,tension:.3,spanGaps:true};
+  }).filter(d=>d.data.some(v=>v!==null));
+  const pn={'all':'전체 기간','2025-10':'10월','2025-11':'11월','2025-12':'12월','2026-01':'1월','2026-02':'2월','2026-03':'3월'};
+  const prod=curProduct==='all'?'부스터 & 아이래쉬':curProduct==='booster'?'부스터':'아이래쉬';
+  document.getElementById('chartTitle').textContent=`${prod} — ${pn[curPeriod]||curPeriod}`;
+  let yMax=0; vk.forEach(k=>fd(_RAW[k].data,curPeriod).forEach(d=>{if(d[1]>yMax)yMax=d[1];}));
+  yMax=Math.min(Math.ceil((yMax+10)/10)*10,110);
+  const todayIdx=labels.indexOf(labels[labels.length-1]);
+  const annotations={top10:{type:'line',yMin:10,yMax:10,borderColor:'rgba(16,185,129,.3)',borderWidth:1.5,borderDash:[5,4],label:{display:true,content:'TOP 10',position:'start',backgroundColor:'rgba(16,185,129,.1)',color:'#10b981',font:{size:10,weight:'bold'},padding:3}}};
+  if(todayIdx>=0) annotations.latest={type:'line',xMin:todayIdx,xMax:todayIdx,borderColor:'rgba(245,158,11,.5)',borderWidth:1.5,borderDash:[4,4],label:{display:true,content:'최신',position:'start',backgroundColor:'rgba(245,158,11,.1)',color:'#d97706',font:{size:10,weight:'bold'},padding:3}};
+  if(chart) chart.destroy();
+  chart=new Chart(document.getElementById('mainChart').getContext('2d'),{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{usePointStyle:true,pointStyle:'circle',padding:14,font:{size:11}}},tooltip:{backgroundColor:'rgba(30,30,46,.92)',padding:11,cornerRadius:8,titleFont:{size:12},bodyFont:{size:11},callbacks:{title:items=>items[0]?.label?.slice(5).replace('-','/')??'',label:c=>c.parsed.y===null?null:c.dataset.label+': '+c.parsed.y+'위'}},annotation:{annotations}},scales:{y:{reverse:false,min:0,max:yMax,title:{display:true,text:'순위 (아래로 갈수록 좋음 ↓)',font:{size:10},color:'#a1a1aa'},grid:{color:'rgba(0,0,0,.04)'},ticks:{callback:v=>v+'위',font:{size:9},color:'#71717a'}},x:{grid:{display:false},ticks:{maxRotation:50,minRotation:30,font:{size:9},color:'#71717a',callback(val,i){const l=this.getLabelForValue(i);return l?l.slice(5).replace('-','/'):'' },autoSkip:true,maxTicksLimit:24}}}}});
+}
+
+function clearActive(f){ document.querySelectorAll(`.btn[data-f="${f}"]`).forEach(b=>b.classList.remove('active','active-rose')); }
+function setProduct(v,e){ curProduct=v; clearActive('product'); e.classList.add(v==='eyelash'?'active-rose':'active'); renderChart(); }
+function setPeriod(v,e){ curPeriod=v; clearActive('period'); e.classList.add('active'); renderChart(); }
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+
+window.addEventListener('load', ()=>fetchSlackData());
 </script>
 </body>
 </html>
