@@ -175,10 +175,8 @@
   ════════════════════════════════════════ -->
 <script>
   const CONFIG = {
-    SLACK_BOT_TOKEN: "xoxb-1248044851984-10879002050257-WGh1rjDd8ZKCJJyx9fMBAUBW",
-    CHANNEL_ID: "C09P8JZ4UQ1",                      // #1132 채널 (고정)
-    FETCH_LIMIT: 200,                                // 가져올 최대 메시지 수
-    AUTO_REFRESH_MIN: 60                             // 자동 새로고침 주기 (분)
+    DATA_URL: "./data.json",
+    AUTO_REFRESH_MIN: 60
   };
 </script>
 
@@ -502,40 +500,13 @@ function render(records) {
 // ═══════════════════════════════════════════════
 
 async function fetchAllMessages() {
-  const token = CONFIG.SLACK_BOT_TOKEN;
-
-  if (!token || token === "YOUR_SLACK_BOT_TOKEN_HERE") {
-    document.getElementById("loading").style.display = "none";
-    document.getElementById("config-banner").style.display = "block";
-    return;
-  }
-
-  let allMessages = [];
-  let cursor = null;
-
   try {
-    // 최대 200개 (약 8일치) 가져오기
-    for (let i = 0; i < 2; i++) {
-      const url = new URL("https://slack.com/api/conversations.history");
-      url.searchParams.set("channel", CONFIG.CHANNEL_ID);
-      url.searchParams.set("limit", "100");
-      if (cursor) url.searchParams.set("cursor", cursor);
-
-      const res = await fetch(url.toString(), {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-
-      if (!data.ok) throw new Error(data.error || "Slack API 오류");
-
-      allMessages = allMessages.concat(data.messages || []);
-      if (!data.has_more || !data.response_metadata?.next_cursor) break;
-      cursor = data.response_metadata.next_cursor;
-    }
-
-    const records = parseMessages(allMessages);
+    const res = await fetch(CONFIG.DATA_URL + "?t=" + Date.now());
+    if (!res.ok) throw new Error(`data.json 없음 (${res.status})`);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || "Slack 데이터 오류");
+    const records = parseMessages(data.messages || []);
     render(records);
-
   } catch (err) {
     document.getElementById("loading").style.display = "none";
     const errEl = document.getElementById("error-msg");
