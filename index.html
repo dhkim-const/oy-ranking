@@ -5,313 +5,553 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🏆 올리브영 랭킹 추이 — 리필드 제품</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Noto Sans KR', sans-serif; background: #f8f8f6; color: #1a1a1a; min-height: 100vh; }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-header { background: white; border-bottom: 1px solid #e8e8e8; padding: 1.25rem 2rem; }
-.header-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-h1 { font-size: 17px; font-weight: 700; }
-.subtitle { font-size: 12px; color: #888; margin-top: 4px; }
-.header-right { display: flex; align-items: center; gap: 10px; }
-.status-text { font-size: 12px; color: #888; }
-.refresh-btn {
-  background: white; border: 1px solid #ddd; border-radius: 6px;
-  padding: 6px 12px; font-size: 12px; font-family: inherit;
-  cursor: pointer; color: #444; transition: background 0.15s;
+:root {
+  --bg: #f5f5f3;
+  --white: #ffffff;
+  --border: #e4e4e0;
+  --text: #111111;
+  --muted: #888888;
+  --green: #00b87a;
+  --green-bg: #e6f9f2;
+  --purple: #7c6ff7;
+  --blue: #3a8ef6;
+  --pink: #e05c8a;
+  --red: #e84040;
+  --red-bg: #fff0f0;
 }
-.refresh-btn:hover { background: #f4f4f4; }
 
-main { max-width: 980px; margin: 0 auto; padding: 1.5rem; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+}
 
-.cards { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 1.5rem; }
-.card { background: white; border: 1px solid #e8e8e8; border-radius: 10px; padding: 1rem; }
-.card-product { font-size: 11px; color: #aaa; margin-bottom: 4px; }
-.card-rank { font-size: 26px; font-weight: 700; }
-.card-rank.green { color: #1D9E75; }
-.card-delta { font-size: 11px; margin-top: 4px; }
-.up { color: #1D9E75; } .down { color: #e24b4a; } .neutral { color: #aaa; }
+/* ── Header ── */
+header {
+  background: #111;
+  color: #fff;
+  padding: 1.4rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.header-left h1 {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+}
+.header-left .sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  margin-top: 3px;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.status {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+}
+.btn-refresh {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 13px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-refresh:hover { background: rgba(255,255,255,0.18); }
 
-.filters { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+/* ── Main ── */
+main { max-width: 1000px; margin: 0 auto; padding: 1.5rem; }
+
+/* ── Cards ── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 10px;
+  margin-bottom: 1.4rem;
+}
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.1rem 1rem;
+}
+.card-label {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.dot-g { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+.dot-p { width: 7px; height: 7px; border-radius: 50%; background: var(--purple); }
+.dot-b { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
+.dot-pk { width: 7px; height: 7px; border-radius: 50%; background: var(--pink); }
+.card-rank {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 5px;
+}
+.card-rank.green { color: var(--green); }
+.card-delta { font-size: 11px; color: var(--muted); }
+.up   { color: var(--green) !important; }
+.down { color: var(--red)   !important; }
+
+/* ── Controls Bar ── */
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+.filters { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
 .filter-group { display: flex; align-items: center; gap: 6px; }
-.filter-label { font-size: 12px; color: #888; }
-.filter-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.filter-label { font-size: 11px; color: var(--muted); font-weight: 500; }
+.tabs { display: flex; gap: 3px; }
 .tab {
-  padding: 4px 10px; border-radius: 20px; font-size: 12px;
-  border: 1px solid #e0e0e0; background: white; cursor: pointer;
-  color: #555; font-family: inherit; transition: all 0.15s;
+  padding: 4px 11px;
+  border-radius: 20px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  cursor: pointer;
+  color: #555;
+  font-family: inherit;
+  font-weight: 400;
+  transition: all 0.12s;
+  white-space: nowrap;
 }
-.tab.active { background: #1a1a1a; color: white; border-color: #1a1a1a; }
-.tab:hover:not(.active) { background: #f4f4f4; }
+.tab.active { background: #111; color: #fff; border-color: #111; font-weight: 500; }
+.tab:hover:not(.active) { background: #f0f0ee; }
 
-.chart-section { background: white; border: 1px solid #e8e8e8; border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem; }
-.chart-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px; }
-.chart-title-wrap { display: flex; align-items: center; gap: 8px; }
-.chart-title { font-size: 14px; font-weight: 700; }
+/* 시간 단위 토글 */
+.view-toggle { display: flex; gap: 3px; }
+.vtab {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  cursor: pointer;
+  color: #555;
+  font-family: inherit;
+  transition: all 0.12s;
+}
+.vtab.active { background: var(--green); color: #fff; border-color: var(--green); font-weight: 500; }
+
+/* ── Chart Section ── */
+.chart-box {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.4rem;
+  margin-bottom: 1rem;
+}
+.chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.1rem;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chart-title-row { display: flex; align-items: center; gap: 8px; }
+.chart-title { font-size: 15px; font-weight: 700; }
 .live-badge {
   display: inline-flex; align-items: center; gap: 4px;
-  background: #fff0f0; color: #e24b4a; font-size: 11px; font-weight: 700;
-  padding: 2px 8px; border-radius: 20px; border: 1px solid #fcc;
+  background: var(--red-bg);
+  color: var(--red);
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 20px;
+  border: 1px solid #ffcccc;
+  letter-spacing: 0.05em;
 }
-.live-dot { width: 6px; height: 6px; border-radius: 50%; background: #e24b4a; animation: pulse 1.5s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--red);
+  animation: blink 1.4s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
-.legend { display: flex; flex-wrap: wrap; gap: 10px; }
-.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #666; }
-.legend-dot { width: 10px; height: 3px; border-radius: 2px; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; }
+.leg { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+.leg-line {
+  width: 18px; height: 3px; border-radius: 2px;
+}
 
-.chart-wrap { position: relative; height: 300px; }
+.chart-wrap { position: relative; height: 320px; }
 
-#loading { text-align: center; padding: 4rem; color: #888; font-size: 14px; }
-#error-msg { display: none; background: #fff0f0; border: 1px solid #fcc; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; font-size: 13px; color: #a32d2d; }
+/* ── Notes ── */
+.notes { font-size: 11px; color: #bbb; line-height: 2.2; }
 
-.notes { font-size: 11px; color: #bbb; line-height: 2; }
+/* ── Loading / Error ── */
+#loading { text-align: center; padding: 5rem; color: var(--muted); font-size: 13px; }
+#error-box {
+  display: none;
+  background: var(--red-bg);
+  border: 1px solid #fcc;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.2rem;
+  font-size: 13px;
+  color: #a32d2d;
+}
+
+@media (max-width: 640px) {
+  .cards { grid-template-columns: repeat(2, 1fr); }
+  header { padding: 1rem; }
+  main { padding: 1rem; }
+}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-top">
-    <div>
-      <h1>🏆 올리브영 랭킹 추이 — 리필드 제품</h1>
-      <div class="subtitle">채널 생성일 2025-10-27 ~ 현재 &nbsp;·&nbsp; Slack 자동 연동</div>
-    </div>
-    <div class="header-right">
-      <span class="status-text" id="status-text">슬랙 최신 데이터 확인 중…</span>
-      <button class="refresh-btn" onclick="loadData()">🔄 지금 업데이트</button>
-    </div>
+  <div class="header-left">
+    <h1>🏆 올리브영 랭킹 추이 — 리필드 제품</h1>
+    <div class="sub">채널 생성일 2025-10-27 ~ 현재 &nbsp;·&nbsp; Slack 자동 연동</div>
+  </div>
+  <div class="header-right">
+    <span class="status" id="status">슬랙 최신 데이터 확인 중…</span>
+    <button class="btn-refresh" onclick="loadData()">🔄 지금 업데이트</button>
   </div>
 </header>
 
 <main>
-  <div id="error-msg"></div>
+  <div id="error-box"></div>
   <div id="loading">⏳ 슬랙 최신 데이터 확인 중…</div>
 
   <div id="dashboard" style="display:none">
+
+    <!-- 카드 4개 -->
     <div class="cards">
       <div class="card">
-        <div class="card-product">부스터 · 헤어케어</div>
+        <div class="card-label"><span class="dot-g"></span>부스터 · 헤어케어</div>
         <div class="card-rank green" id="c-bh">—</div>
         <div class="card-delta" id="d-bh"></div>
       </div>
       <div class="card">
-        <div class="card-product">아이래쉬 · 메이크업</div>
+        <div class="card-label"><span class="dot-p"></span>아이래쉬 · 메이크업</div>
         <div class="card-rank" id="c-lm">—</div>
         <div class="card-delta" id="d-lm"></div>
       </div>
       <div class="card">
-        <div class="card-product">부스터 · 전체</div>
+        <div class="card-label"><span class="dot-b"></span>부스터 · 전체</div>
         <div class="card-rank" id="c-bt">—</div>
         <div class="card-delta" id="d-bt"></div>
       </div>
       <div class="card">
-        <div class="card-product">아이래쉬 · 전체</div>
+        <div class="card-label"><span class="dot-pk"></span>아이래쉬 · 전체</div>
         <div class="card-rank" id="c-lt">—</div>
         <div class="card-delta" id="d-lt"></div>
       </div>
     </div>
 
-    <div class="filters">
-      <div class="filter-group">
-        <span class="filter-label">제품</span>
-        <div class="filter-tabs" id="product-tabs">
-          <button class="tab active" data-val="all">전체</button>
-          <button class="tab" data-val="booster">부스터</button>
-          <button class="tab" data-val="lash">아이래쉬</button>
+    <!-- 컨트롤 바 -->
+    <div class="controls">
+      <div class="filters">
+        <div class="filter-group">
+          <span class="filter-label">제품</span>
+          <div class="tabs" id="product-tabs">
+            <button class="tab active" data-val="all">전체</button>
+            <button class="tab" data-val="booster">부스터</button>
+            <button class="tab" data-val="lash">아이래쉬</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">기간</span>
+          <div class="tabs" id="period-tabs">
+            <button class="tab active" data-val="all">전체</button>
+            <button class="tab" data-val="10">10월</button>
+            <button class="tab" data-val="11">11월</button>
+            <button class="tab" data-val="12">12월</button>
+            <button class="tab" data-val="1">1월</button>
+            <button class="tab" data-val="2">2월</button>
+            <button class="tab" data-val="3">3월</button>
+            <button class="tab" data-val="4">4월</button>
+          </div>
         </div>
       </div>
-      <div class="filter-group">
-        <span class="filter-label">기간</span>
-        <div class="filter-tabs" id="period-tabs">
-          <button class="tab active" data-val="all">전체</button>
-          <button class="tab" data-val="10">10월</button>
-          <button class="tab" data-val="11">11월</button>
-          <button class="tab" data-val="12">12월</button>
-          <button class="tab" data-val="1">1월</button>
-          <button class="tab" data-val="2">2월</button>
-          <button class="tab" data-val="3">3월</button>
-          <button class="tab" data-val="4">4월</button>
-        </div>
+      <!-- 시간 단위 토글 -->
+      <div class="view-toggle" id="view-toggle">
+        <button class="vtab active" data-view="daily">일별</button>
+        <button class="vtab" data-view="3h">3시간</button>
       </div>
     </div>
 
-    <div class="chart-section">
-      <div class="chart-header">
-        <div class="chart-title-wrap">
+    <!-- 차트 -->
+    <div class="chart-box">
+      <div class="chart-head">
+        <div class="chart-title-row">
           <span class="chart-title" id="chart-title">부스터 & 아이래쉬 — 전체 기간</span>
-          <span class="live-badge"><span class="live-dot"></span> LIVE</span>
+          <span class="live-badge"><span class="live-dot"></span>LIVE</span>
         </div>
         <div class="legend">
-          <div class="legend-item"><div class="legend-dot" style="background:#1D9E75;height:2px"></div>부스터·헤어케어</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#7F77DD;height:2px"></div>아이래쉬·메이크업</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#378ADD;height:1px;border-top:1px dashed #378ADD"></div>부스터·전체</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#D4537E;height:1px;border-top:1px dashed #D4537E"></div>아이래쉬·전체</div>
+          <div class="leg"><div class="leg-line" style="background:var(--green)"></div>부스터 · 헤어케어</div>
+          <div class="leg"><div class="leg-line" style="background:var(--purple)"></div>아이래쉬 · 메이크업</div>
+          <div class="leg"><div class="leg-line" style="background:var(--blue);opacity:.7" ></div>부스터 · 전체</div>
+          <div class="leg"><div class="leg-line" style="background:var(--pink);opacity:.7"></div>아이래쉬 · 전체</div>
         </div>
       </div>
       <div class="chart-wrap">
-        <canvas id="mainChart" role="img" aria-label="리필드 올리브영 랭킹 추이 차트"></canvas>
+        <canvas id="mainChart" role="img" aria-label="리필드 올리브영 랭킹 추이"></canvas>
       </div>
     </div>
 
     <div class="notes">
       <p>※ 그래프가 아래로 내려갈수록 순위가 좋아지는 것입니다 (1위 = 가장 아래)</p>
+      <p>※ 일별 보기: 하루 중 가장 좋은 순위(최고값) 기준 · 3시간 보기: 3시간 단위 대표값</p>
       <p>※ 파일을 열 때 자동 최신화 · 매 시간 자동 갱신</p>
       <p>※ 데이터 출처: Slack #1132-ct-growth-md-올리브영랭킹</p>
     </div>
+
   </div>
 </main>
 
 <script>
 const DATA_URL = "./data.json";
-let allRecords = [];
-let chartInstance = null;
-let productFilter = "all";
-let periodFilter = "all";
+let allRecs = [];
+let chartInst = null;
+let pFilter = "all";   // product
+let mFilter = "all";   // month
+let viewMode = "daily"; // daily | 3h
 
-function parseMessages(messages) {
-  const records = [];
-  for (const msg of messages) {
-    const text = msg.text || "";
-    if (!text.includes("올리브영 랭킹")) continue;
-    const ts = parseFloat(msg.ts);
-    const kstDate = new Date(new Date(ts * 1000).toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+/* ── 파싱 ── */
+function parseMessages(msgs) {
+  const recs = [];
+  for (const m of msgs) {
+    const t = m.text || "";
+    if (!t.includes("올리브영 랭킹")) continue;
+    const ts = parseFloat(m.ts);
+    const d  = new Date(new Date(ts * 1000).toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
 
     let bh = null, lm = null, bt = null, lt = null;
 
-    const hairMatch = text.match(/헤어케어[\s\S]*?\*(\d+)위\*/);
-    if (hairMatch) bh = parseInt(hairMatch[1]);
+    const hM = t.match(/헤어케어[\s\S]*?\*(\d+)위\*/);
+    if (hM) bh = +hM[1];
 
-    const makeupMatch = text.match(/메이크업[\s\S]*?\*(\d+)위\*/);
-    if (makeupMatch) lm = parseInt(makeupMatch[1]);
+    const mM = t.match(/메이크업[\s\S]*?\*(\d+)위\*/);
+    if (mM) lm = +mM[1];
 
-    const totalIdx = text.indexOf("전체");
-    if (totalIdx !== -1) {
-      const totalText = text.slice(totalIdx);
-      const boosterM = totalText.match(/\*(\d+)위\*[^\n]*(?:부스터|탈모)/);
-      const lashM    = totalText.match(/\*(\d+)위\*[^\n]*(?:아이래쉬|속눈썹)/);
-      if (boosterM) bt = parseInt(boosterM[1]);
-      if (lashM)    lt = parseInt(lashM[1]);
-      if (!bt && !lt) {
-        const simple = totalText.match(/\*(\d+)위\*/);
-        if (simple) bt = parseInt(simple[1]);
-      }
+    const tidx = t.indexOf("전체");
+    if (tidx !== -1) {
+      const tt = t.slice(tidx);
+      const bM2 = tt.match(/\*(\d+)위\*[^\n]*(?:부스터|탈모)/);
+      const lM2 = tt.match(/\*(\d+)위\*[^\n]*(?:아이래쉬|속눈썹)/);
+      if (bM2) bt = +bM2[1];
+      if (lM2) lt = +lM2[1];
+      if (!bt && !lt) { const s = tt.match(/\*(\d+)위\*/); if (s) bt = +s[1]; }
     }
 
-    if (bh || lm || bt || lt) records.push({ ts, date: kstDate, bh, lm, bt, lt });
+    if (bh || lm || bt || lt) recs.push({ ts, d, bh, lm, bt, lt });
   }
-  return records.sort((a, b) => a.ts - b.ts);
+  return recs.sort((a, b) => a.ts - b.ts);
 }
 
-function setCard(suffix, cur, prev) {
-  const rankEl = document.getElementById("c-" + suffix);
-  const deltaEl = document.getElementById("d-" + suffix);
-  if (!rankEl) return;
-  rankEl.textContent = cur !== null ? cur + "위" : "—";
-  if (!deltaEl) return;
-  if (cur !== null && prev !== null) {
-    const diff = prev - cur;
-    if (diff > 0)      { deltaEl.textContent = "▲ " + diff + "계단 상승"; deltaEl.className = "card-delta up"; }
-    else if (diff < 0) { deltaEl.textContent = "▼ " + Math.abs(diff) + "계단 하락"; deltaEl.className = "card-delta down"; }
-    else               { deltaEl.textContent = "변동 없음"; deltaEl.className = "card-delta neutral"; }
-  } else { deltaEl.textContent = ""; }
+/* ── 집계 헬퍼 ── */
+function best(arr) { return arr.length ? Math.min(...arr.filter(v => v !== null)) : null; }
+
+function aggregateDaily(recs) {
+  const map = {};
+  for (const r of recs) {
+    const key = r.d.getFullYear() + "-" + String(r.d.getMonth()+1).padStart(2,"0") + "-" + String(r.d.getDate()).padStart(2,"0");
+    if (!map[key]) map[key] = { bh:[], lm:[], bt:[], lt:[], key };
+    if (r.bh) map[key].bh.push(r.bh);
+    if (r.lm) map[key].lm.push(r.lm);
+    if (r.bt) map[key].bt.push(r.bt);
+    if (r.lt) map[key].lt.push(r.lt);
+  }
+  return Object.values(map).sort((a,b) => a.key > b.key ? 1 : -1).map(g => ({
+    label: g.key.slice(5),   // MM-DD
+    bh: best(g.bh), lm: best(g.lm), bt: best(g.bt), lt: best(g.lt)
+  }));
 }
 
+function aggregate3h(recs) {
+  const map = {};
+  for (const r of recs) {
+    const slot = Math.floor(r.d.getHours() / 3) * 3;
+    const key  = r.d.getFullYear() + "-" + String(r.d.getMonth()+1).padStart(2,"0") + "-" + String(r.d.getDate()).padStart(2,"0") + "T" + String(slot).padStart(2,"0");
+    if (!map[key]) map[key] = { bh:[], lm:[], bt:[], lt:[], key };
+    if (r.bh) map[key].bh.push(r.bh);
+    if (r.lm) map[key].lm.push(r.lm);
+    if (r.bt) map[key].bt.push(r.bt);
+    if (r.lt) map[key].lt.push(r.lt);
+  }
+  return Object.values(map).sort((a,b) => a.key > b.key ? 1 : -1).map(g => {
+    const parts = g.key.split("T");
+    const md = parts[0].slice(5);
+    const h  = parts[1];
+    return {
+      label: md + " " + h + "시",
+      bh: best(g.bh), lm: best(g.lm), bt: best(g.bt), lt: best(g.lt)
+    };
+  });
+}
+
+/* ── 필터 적용 ── */
 function getFiltered() {
-  if (periodFilter === "all") return allRecords;
-  const m = parseInt(periodFilter);
-  return allRecords.filter(r => r.date.getMonth() + 1 === m);
+  let recs = allRecs;
+  if (mFilter !== "all") {
+    const mo = parseInt(mFilter);
+    recs = recs.filter(r => r.d.getMonth()+1 === mo);
+  }
+  return recs;
 }
 
+/* ── 차트 렌더 ── */
 function renderChart() {
-  const recs = getFiltered();
-  const showB = productFilter === "all" || productFilter === "booster";
-  const showL = productFilter === "all" || productFilter === "lash";
+  const recs  = getFiltered();
+  const agg   = viewMode === "daily" ? aggregateDaily(recs) : aggregate3h(recs);
+  const showB = pFilter === "all" || pFilter === "booster";
+  const showL = pFilter === "all" || pFilter === "lash";
 
-  const labels = recs.map(r =>
-    r.date.toLocaleString("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Seoul" })
-  );
-  const sparse = recs.length > 80;
+  const labels = agg.map(a => a.label);
+  const sparse = agg.length > 60;
+
   const datasets = [];
-
   if (showB) {
-    datasets.push({ label: "부스터·헤어케어", data: recs.map(r => r.bh),  borderColor: "#1D9E75", backgroundColor: "rgba(29,158,117,0.06)", fill: true,  tension: 0.3, borderWidth: 2, pointRadius: sparse ? 0 : 3, spanGaps: false });
-    datasets.push({ label: "부스터·전체",    data: recs.map(r => r.bt),  borderColor: "#378ADD", borderDash: [5,4], backgroundColor: "transparent",       fill: false, tension: 0.3, borderWidth: 1.5, pointRadius: sparse ? 0 : 2, spanGaps: false });
+    datasets.push({ label:"부스터·헤어케어", data: agg.map(a=>a.bh), borderColor:"#00b87a", backgroundColor:"rgba(0,184,122,0.07)", fill:true,  tension:0.35, borderWidth:2.5, pointRadius: sparse?0:4, pointBackgroundColor:"#00b87a", pointBorderColor:"#fff", pointBorderWidth:2, spanGaps:false });
+    datasets.push({ label:"부스터·전체",     data: agg.map(a=>a.bt), borderColor:"#3a8ef6", borderDash:[5,4], backgroundColor:"transparent", fill:false, tension:0.35, borderWidth:1.5, pointRadius: sparse?0:2, spanGaps:false });
   }
   if (showL) {
-    datasets.push({ label: "아이래쉬·메이크업", data: recs.map(r => r.lm), borderColor: "#7F77DD", backgroundColor: "rgba(127,119,221,0.04)", fill: true,  tension: 0.3, borderWidth: 2, pointRadius: sparse ? 0 : 3, spanGaps: false });
-    datasets.push({ label: "아이래쉬·전체",   data: recs.map(r => r.lt), borderColor: "#D4537E", borderDash: [5,4], backgroundColor: "transparent",       fill: false, tension: 0.3, borderWidth: 1.5, pointRadius: sparse ? 0 : 2, spanGaps: false });
+    datasets.push({ label:"아이래쉬·메이크업", data: agg.map(a=>a.lm), borderColor:"#7c6ff7", backgroundColor:"rgba(124,111,247,0.05)", fill:true,  tension:0.35, borderWidth:2.5, pointRadius: sparse?0:4, pointBackgroundColor:"#7c6ff7", pointBorderColor:"#fff", pointBorderWidth:2, spanGaps:false });
+    datasets.push({ label:"아이래쉬·전체",   data: agg.map(a=>a.lt), borderColor:"#e05c8a", borderDash:[5,4], backgroundColor:"transparent", fill:false, tension:0.35, borderWidth:1.5, pointRadius: sparse?0:2, spanGaps:false });
   }
 
-  if (chartInstance) chartInstance.destroy();
-  chartInstance = new Chart(document.getElementById("mainChart"), {
+  if (chartInst) chartInst.destroy();
+  chartInst = new Chart(document.getElementById("mainChart"), {
     type: "line",
     data: { labels, datasets },
     options: {
       responsive: true, maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { label: ctx => ctx.parsed.y !== null ? ctx.dataset.label + ": " + ctx.parsed.y + "위" : null } }
+        tooltip: {
+          callbacks: {
+            label: ctx => ctx.parsed.y !== null ? " " + ctx.dataset.label + ": " + ctx.parsed.y + "위" : null
+          }
+        }
       },
       scales: {
-        y: { reverse: true, min: 1, title: { display: true, text: "순위 (낮을수록 좋음)", font: { size: 11 }, color: "#bbb" }, grid: { color: "rgba(0,0,0,0.04)" }, ticks: { color: "#bbb", font: { size: 11 } } },
-        x: { grid: { display: false }, ticks: { color: "#bbb", font: { size: 10 }, autoSkip: true, maxTicksLimit: 12 } }
+        y: {
+          reverse: true, min: 1,
+          title: { display: true, text: "순위 (낮을수록 좋음)", font:{size:11}, color:"#bbb" },
+          grid: { color: "rgba(0,0,0,0.04)" },
+          ticks: { color: "#bbb", font:{size:11}, stepSize: 10 }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: "#bbb", font:{size:10}, autoSkip:true, maxTicksLimit: viewMode==="daily" ? 20 : 12, maxRotation:30 }
+        }
       }
     }
   });
 
-  const prodLabel   = productFilter === "all" ? "부스터 & 아이래쉬" : (productFilter === "booster" ? "부스터" : "아이래쉬");
-  const periodLabel = periodFilter === "all" ? "전체 기간" : periodFilter + "월";
-  document.getElementById("chart-title").textContent = prodLabel + " — " + periodLabel;
+  // 차트 제목
+  const prodLabel   = pFilter==="all" ? "부스터 & 아이래쉬" : (pFilter==="booster" ? "부스터" : "아이래쉬");
+  const periodLabel = mFilter==="all" ? "전체 기간" : mFilter+"월";
+  const viewLabel   = viewMode==="daily" ? "일별" : "3시간";
+  document.getElementById("chart-title").textContent = prodLabel + " — " + periodLabel + " (" + viewLabel + ")";
 }
 
+/* ── 카드 ── */
+function setCard(s, cur, prv) {
+  const re = document.getElementById("c-"+s);
+  const de = document.getElementById("d-"+s);
+  if (!re) return;
+  re.textContent = cur !== null ? cur + "위" : "—";
+  if (!de) return;
+  if (cur !== null && prv !== null) {
+    const diff = prv - cur;
+    if (diff > 0)      { de.textContent = "▲ "+diff+"계단 상승"; de.className="card-delta up"; }
+    else if (diff < 0) { de.textContent = "▼ "+Math.abs(diff)+"계단 하락"; de.className="card-delta down"; }
+    else               { de.textContent = "변동 없음"; de.className="card-delta"; }
+  } else de.textContent = "";
+}
 function renderCards() {
-  const n = allRecords.length;
-  const cur = n > 0 ? allRecords[n-1] : {};
-  const prv = n > 1 ? allRecords[n-2] : {};
-  setCard("bh", cur.bh ?? null, prv.bh ?? null);
-  setCard("lm", cur.lm ?? null, prv.lm ?? null);
-  setCard("bt", cur.bt ?? null, prv.bt ?? null);
-  setCard("lt", cur.lt ?? null, prv.lt ?? null);
-  if (cur.date) {
-    document.getElementById("status-text").textContent = "최근 업데이트: " +
-      cur.date.toLocaleString("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Seoul" });
+  const n   = allRecs.length;
+  const cur = n>0 ? allRecs[n-1] : {};
+  const prv = n>1 ? allRecs[n-2] : {};
+  setCard("bh", cur.bh??null, prv.bh??null);
+  setCard("lm", cur.lm??null, prv.lm??null);
+  setCard("bt", cur.bt??null, prv.bt??null);
+  setCard("lt", cur.lt??null, prv.lt??null);
+  if (cur.d) {
+    document.getElementById("status").textContent = "최근 업데이트: " +
+      cur.d.toLocaleString("ko-KR", { month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", hour12:false, timeZone:"Asia/Seoul" });
   }
 }
 
+/* ── 데이터 로드 ── */
 async function loadData() {
-  document.getElementById("status-text").textContent = "슬랙 최신 데이터 확인 중…";
+  document.getElementById("status").textContent = "슬랙 최신 데이터 확인 중…";
   try {
-    const res = await fetch(DATA_URL + "?t=" + Date.now());
+    const res  = await fetch(DATA_URL + "?t=" + Date.now());
     if (!res.ok) throw new Error("data.json 없음 (" + res.status + ")");
     const data = await res.json();
     if (!data.ok) throw new Error(data.error || "Slack 오류");
-    allRecords = parseMessages(data.messages || []);
+    allRecs = parseMessages(data.messages || []);
     document.getElementById("loading").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
     renderCards();
     renderChart();
   } catch (err) {
     document.getElementById("loading").style.display = "none";
-    const el = document.getElementById("error-msg");
+    const el = document.getElementById("error-box");
     el.style.display = "block";
     el.textContent = "⚠️ 데이터를 불러오지 못했습니다: " + err.message;
-    document.getElementById("status-text").textContent = "불러오기 실패";
+    document.getElementById("status").textContent = "불러오기 실패";
   }
 }
 
+/* ── 이벤트 ── */
 document.getElementById("product-tabs").addEventListener("click", e => {
   if (!e.target.classList.contains("tab")) return;
   document.querySelectorAll("#product-tabs .tab").forEach(t => t.classList.remove("active"));
   e.target.classList.add("active");
-  productFilter = e.target.dataset.val;
+  pFilter = e.target.dataset.val;
   renderChart();
 });
 document.getElementById("period-tabs").addEventListener("click", e => {
   if (!e.target.classList.contains("tab")) return;
   document.querySelectorAll("#period-tabs .tab").forEach(t => t.classList.remove("active"));
   e.target.classList.add("active");
-  periodFilter = e.target.dataset.val;
+  mFilter = e.target.dataset.val;
+  renderChart();
+});
+document.getElementById("view-toggle").addEventListener("click", e => {
+  if (!e.target.classList.contains("vtab")) return;
+  document.querySelectorAll(".vtab").forEach(t => t.classList.remove("active"));
+  e.target.classList.add("active");
+  viewMode = e.target.dataset.view;
   renderChart();
 });
 
