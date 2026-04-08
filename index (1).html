@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏆 리필드 올리브영 랭킹 추이</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --green: #1D9E75;
+    --green-light: #EAF3DE;
+    --green-dark: #0F6E56;
+    --purple: #7F77DD;
+    --purple-light: #EEEDFE;
+    --gray-100: #f4f4f4;
+    --gray-200: #e8e8e8;
+    --gray-500: #888;
+    --gray-900: #1a1a1a;
+    --border: #e2e2e2;
+  }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #f7f7f5;
+    color: var(--gray-900);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .header-badge {
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  header h1 { font-size: 16px; font-weight: 700; color: var(--gray-900); }
+  .update-info { font-size: 12px; color: var(--gray-500); display: flex; align-items: center; gap: 6px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: inline-block; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── Layout ── */
+  main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* ── Metric Cards ── */
+  .cards { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-bottom: 2rem; }
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+  .card-label { font-size: 12px; color: var(--gray-500); margin-bottom: 6px; }
+  .card-value { font-size: 28px; font-weight: 700; }
+  .card-sub { font-size: 12px; color: var(--gray-500); margin-top: 4px; }
+  .card-delta { font-size: 13px; margin-top: 4px; font-weight: 500; }
+  .up { color: var(--green); }
+  .down { color: #e24b4a; }
+  .neutral { color: var(--gray-500); }
+
+  /* ── Chart section ── */
+  .section {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+  .section-title { font-size: 14px; font-weight: 700; }
+  .legend { display: flex; gap: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--gray-500); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  .chart-wrap { position: relative; height: 260px; }
+
+  /* ── Table ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-500);
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr { border-bottom: 1px solid #f0f0f0; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 9px 12px; }
+  .rank-chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .rank-top3 { background: var(--green-light); color: var(--green-dark); }
+  .rank-top10 { background: #EAF3DE; color: #3B6D11; }
+  .rank-rest { background: var(--gray-100); color: var(--gray-500); }
+
+  /* ── Loading / Error ── */
+  #loading {
+    text-align: center;
+    padding: 4rem;
+    color: var(--gray-500);
+    font-size: 14px;
+  }
+  #error-msg {
+    display: none;
+    background: #fcebeb;
+    border: 1px solid #f0b8b8;
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    font-size: 13px;
+    color: #a32d2d;
+  }
+
+  /* ── Config Banner ── */
+  #config-banner {
+    background: #FAEEDA;
+    border: 1px solid #FAC775;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    font-size: 13px;
+    color: #633806;
+    display: none;
+  }
+  #config-banner code {
+    background: rgba(0,0,0,0.07);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: monospace;
+  }
+
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 12px;
+    color: var(--gray-500);
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+  ✏️  설정: 아래 SLACK_BOT_TOKEN에 발급받은
+      봇 토큰(xoxb-...)을 붙여넣으세요.
+  ════════════════════════════════════════ -->
+<script>
+  const CONFIG = {
+    SLACK_BOT_TOKEN: "xoxb-1248044851984-10879002050257-WGh1rjDd8ZKCJJyx9fMBAUBW",
+    CHANNEL_ID: "C09P8JZ4UQ1",
+    AUTO_REFRESH_MIN: 60
+  };
+</script>
+
+<header>
+  <div class="header-left">
+    <span class="header-badge">Live</span>
+    <h1>🏆 리필드 올리브영 랭킹 추이</h1>
+  </div>
+  <div class="update-info">
+    <span class="dot"></span>
+    <span id="last-update-text">데이터 불러오는 중...</span>
+  </div>
+</header>
+
+<main>
+  <div id="config-banner">
+    ⚠️ Slack Bot Token이 설정되지 않았습니다. <code>index.html</code> 상단의 <code>CONFIG.SLACK_BOT_TOKEN</code>에 <code>xoxb-...</code> 토큰을 입력해주세요.
+  </div>
+  <div id="error-msg"></div>
+  <div id="loading">⏳ 슬랙 채널에서 랭킹 데이터를 불러오는 중...</div>
+
+  <div id="dashboard" style="display:none">
+
+    <!-- 메트릭 카드 -->
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">최근 업데이트</div>
+        <div class="card-value" id="latest-time" style="font-size:18px; margin-top:4px;">—</div>
+        <div class="card-sub" id="latest-date">—</div>
+      </div>
+      <div class="card" style="border-color: var(--green);">
+        <div class="card-label">헤어케어 현재</div>
+        <div class="card-value" id="hair-rank" style="color: var(--green);">—</div>
+        <div class="card-delta" id="hair-delta">—</div>
+      </div>
+      <div class="card">
+        <div class="card-label">전체 현재</div>
+        <div class="card-value" id="total-rank">—</div>
+        <div class="card-delta" id="total-delta">—</div>
+      </div>
+    </div>
+
+    <!-- 차트 -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">시간별 순위 추이 (오늘)</span>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background: var(--green);"></div> 헤어케어
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: var(--purple);"></div> 전체
+          </div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="todayChart" role="img" aria-label="오늘 시간별 순위 추이 차트"></canvas>
+      </div>
+    </div>
+
+    <!-- 최근 7일 차트 -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">최근 랭킹 추이 (헤어케어)</span>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background: var(--green);"></div> 매 시 최고 순위
+          </div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="historyChart" role="img" aria-label="최근 랭킹 추이 차트"></canvas>
+      </div>
+    </div>
+
+    <!-- 최근 기록 테이블 -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">최근 기록</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>시간</th>
+              <th>헤어케어</th>
+              <th>전체</th>
+            </tr>
+          </thead>
+          <tbody id="records-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>데이터 출처: 올리브영 실시간 랭킹 · 슬랙 채널 #1132 · <span id="auto-refresh-note"></span></footer>
+
+<script>
+// ═══════════════════════════════════════════════
+//  파싱 & 렌더링 로직
+// ═══════════════════════════════════════════════
+
+let todayChartInstance = null;
+let historyChartInstance = null;
+
+function parseMessages(messages) {
+  const records = [];
+
+  for (const msg of messages) {
+    const text = msg.text || "";
+    if (!text.includes("올리브영 랭킹")) continue;
+
+    const ts = parseFloat(msg.ts);
+    const date = new Date(ts * 1000);
+    const kstDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+
+    const timeStr = kstDate.toLocaleString("ko-KR", {
+      month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", hour12: false,
+      timeZone: "Asia/Seoul"
+    });
+
+    const hairMatch = text.match(/헤어케어[\s\S]*?\*(\d+)위\*/);
+    const totalMatch = text.match(/전체[\s\S]*?\*(\d+)위\*/);
+
+    records.push({
+      ts,
+      date: kstDate,
+      timeStr,
+      hairRank: hairMatch ? parseInt(hairMatch[1]) : null,
+      totalRank: totalMatch ? parseInt(totalMatch[1]) : null
+    });
+  }
+
+  return records.sort((a, b) => a.ts - b.ts);
+}
+
+function getDelta(current, previous) {
+  if (current === null || previous === null) return null;
+  const diff = previous - current; // 순위이므로 낮아지면 개선
+  if (diff > 0) return { text: `▲ ${diff}계단 상승`, cls: "up" };
+  if (diff < 0) return { text: `▼ ${Math.abs(diff)}계단 하락`, cls: "down" };
+  return { text: "변동 없음", cls: "neutral" };
+}
+
+function rankChip(rank) {
+  if (rank === null) return '<span style="color:#ccc">—</span>';
+  const cls = rank <= 3 ? "rank-top3" : rank <= 10 ? "rank-top10" : "rank-rest";
+  return `<span class="rank-chip ${cls}">${rank}위</span>`;
+}
+
+function render(records) {
+  if (!records.length) {
+    document.getElementById("loading").textContent = "데이터가 없습니다.";
+    return;
+  }
+
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("dashboard").style.display = "block";
+
+  const latest = records[records.length - 1];
+  const prev = records[records.length - 2] || {};
+
+  // 카드
+  document.getElementById("latest-time").textContent =
+    latest.date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Seoul" });
+  document.getElementById("latest-date").textContent =
+    latest.date.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short", timeZone: "Asia/Seoul" });
+
+  document.getElementById("hair-rank").textContent = latest.hairRank !== null ? `${latest.hairRank}위` : "—";
+  document.getElementById("total-rank").textContent = latest.totalRank !== null ? `${latest.totalRank}위` : "—";
+
+  const hairDelta = getDelta(latest.hairRank, prev.hairRank);
+  const totalDelta = getDelta(latest.totalRank, prev.totalRank);
+
+  if (hairDelta) {
+    const el = document.getElementById("hair-delta");
+    el.textContent = hairDelta.text;
+    el.className = `card-delta ${hairDelta.cls}`;
+  }
+  if (totalDelta) {
+    const el = document.getElementById("total-delta");
+    el.textContent = totalDelta.text;
+    el.className = `card-delta ${totalDelta.cls}`;
+  }
+
+  document.getElementById("last-update-text").textContent =
+    `마지막 업데이트: ${latest.timeStr}`;
+
+  // ─ 오늘 차트 ─
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+  const todayRecords = records.filter(r => {
+    const d = r.date;
+    const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    return ds === todayStr;
+  });
+
+  const todayLabels = todayRecords.map(r =>
+    r.date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Seoul" })
+  );
+
+  if (todayChartInstance) todayChartInstance.destroy();
+  todayChartInstance = new Chart(document.getElementById("todayChart"), {
+    type: "line",
+    data: {
+      labels: todayLabels,
+      datasets: [
+        {
+          label: "헤어케어",
+          data: todayRecords.map(r => r.hairRank),
+          borderColor: "#1D9E75",
+          backgroundColor: "rgba(29,158,117,0.07)",
+          fill: true, tension: 0.3, borderWidth: 2,
+          pointRadius: 4, pointBackgroundColor: "#1D9E75",
+          pointBorderColor: "#fff", pointBorderWidth: 2,
+          spanGaps: false
+        },
+        {
+          label: "전체",
+          data: todayRecords.map(r => r.totalRank),
+          borderColor: "#7F77DD",
+          backgroundColor: "rgba(0,0,0,0)",
+          fill: false, tension: 0.3, borderWidth: 2,
+          borderDash: [5, 4],
+          pointRadius: 4, pointBackgroundColor: "#7F77DD",
+          pointBorderColor: "#fff", pointBorderWidth: 2,
+          spanGaps: false
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ctx.parsed.y !== null ? `${ctx.dataset.label}: ${ctx.parsed.y}위` : null
+          }
+        }
+      },
+      scales: {
+        y: {
+          reverse: true, min: 1,
+          title: { display: true, text: "순위 (낮을수록 좋음)", font: { size: 11 }, color: "#888" },
+          grid: { color: "rgba(128,128,128,0.08)" },
+          ticks: { color: "#888", font: { size: 11 } }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: "#888", font: { size: 11 }, autoSkip: true, maxTicksLimit: 12 }
+        }
+      }
+    }
+  });
+
+  // ─ 히스토리 차트 (헤어케어, 최근 48개 포인트) ─
+  const histRecords = records.slice(-48);
+  const histLabels = histRecords.map(r => {
+    const h = r.date.getHours();
+    const m = r.date;
+    return `${m.getMonth()+1}/${m.getDate()} ${String(h).padStart(2,"0")}시`;
+  });
+
+  if (historyChartInstance) historyChartInstance.destroy();
+  historyChartInstance = new Chart(document.getElementById("historyChart"), {
+    type: "line",
+    data: {
+      labels: histLabels,
+      datasets: [{
+        label: "헤어케어",
+        data: histRecords.map(r => r.hairRank),
+        borderColor: "#1D9E75",
+        backgroundColor: "rgba(29,158,117,0.05)",
+        fill: true, tension: 0.3, borderWidth: 2,
+        pointRadius: 3, pointBackgroundColor: "#1D9E75",
+        spanGaps: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => `헤어케어: ${ctx.parsed.y}위` }
+        }
+      },
+      scales: {
+        y: {
+          reverse: true, min: 1,
+          grid: { color: "rgba(128,128,128,0.08)" },
+          ticks: { color: "#888", font: { size: 11 } }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: "#888", font: { size: 11 }, autoSkip: true, maxTicksLimit: 10 }
+        }
+      }
+    }
+  });
+
+  // ─ 테이블 (최근 30개, 최신순) ─
+  const tbody = document.getElementById("records-body");
+  tbody.innerHTML = "";
+  const tableRecords = [...records].reverse().slice(0, 30);
+  for (const r of tableRecords) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="color: #555; font-size:13px;">${r.timeStr}</td>
+      <td>${rankChip(r.hairRank)}</td>
+      <td>${rankChip(r.totalRank)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  Slack API 호출
+// ═══════════════════════════════════════════════
+
+async function fetchAllMessages() {
+  try {
+    const res = await fetch(
+      `https://slack.com/api/conversations.history?channel=${CONFIG.CHANNEL_ID}&limit=200`,
+      { headers: { Authorization: `Bearer ${CONFIG.SLACK_BOT_TOKEN}` } }
+    );
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || "Slack API 오류");
+    const records = parseMessages(data.messages || []);
+    render(records);
+  } catch (err) {
+    document.getElementById("loading").style.display = "none";
+    const errEl = document.getElementById("error-msg");
+    errEl.style.display = "block";
+    errEl.textContent = `⚠️ 데이터를 불러오지 못했습니다: ${err.message}`;
+    console.error(err);
+  }
+}
+
+// ─ 자동 새로고침 ─
+document.getElementById("auto-refresh-note").textContent =
+  `${CONFIG.AUTO_REFRESH_MIN}분마다 자동 갱신`;
+
+fetchAllMessages();
+setInterval(fetchAllMessages, CONFIG.AUTO_REFRESH_MIN * 60 * 1000);
+</script>
+</body>
+</html>
