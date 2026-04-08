@@ -8,176 +8,113 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
 :root {
   --bg: #f5f5f3;
-  --white: #ffffff;
+  --white: #fff;
   --border: #e4e4e0;
-  --text: #111111;
-  --muted: #888888;
+  --text: #111;
+  --muted: #888;
   --green: #00b87a;
-  --green-bg: #e6f9f2;
   --purple: #7c6ff7;
   --blue: #3a8ef6;
   --pink: #e05c8a;
   --red: #e84040;
-  --red-bg: #fff0f0;
 }
-
-body {
-  font-family: 'Noto Sans KR', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 14px;
-  line-height: 1.5;
-}
+body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
 
 /* ── Header ── */
 header {
   background: #111;
   color: #fff;
-  padding: 1.4rem 2rem;
+  padding: 1.25rem 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   position: sticky;
   top: 0;
   z-index: 20;
 }
-.header-left h1 {
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: -0.3px;
-}
-.header-left .sub {
-  font-size: 12px;
-  color: rgba(255,255,255,0.45);
-  margin-top: 3px;
-}
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.status {
-  font-size: 12px;
-  color: rgba(255,255,255,0.5);
-}
+.h-title { font-size: 18px; font-weight: 900; letter-spacing: -.3px; }
+.h-sub   { font-size: 11px; color: rgba(255,255,255,.4); margin-top: 3px; }
+.h-right { display: flex; align-items: center; gap: 10px; }
+#status  { font-size: 12px; color: rgba(255,255,255,.45); }
 .btn-refresh {
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
   color: #fff;
   border-radius: 6px;
   padding: 6px 13px;
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.15s;
   white-space: nowrap;
 }
-.btn-refresh:hover { background: rgba(255,255,255,0.18); }
+.btn-refresh:hover { background: rgba(255,255,255,.18); }
 
-/* ── Main ── */
-main { max-width: 1000px; margin: 0 auto; padding: 1.5rem; }
+/* ── Main — 여백 좁게, 넓은 레이아웃 ── */
+main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem; }
 
 /* ── Cards ── */
 .cards {
   display: grid;
   grid-template-columns: repeat(4, minmax(0,1fr));
   gap: 10px;
-  margin-bottom: 1.4rem;
+  margin-bottom: 1.25rem;
 }
-.card {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.1rem 1rem;
-}
-.card-label {
-  font-size: 11px;
-  color: var(--muted);
-  font-weight: 500;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-.dot-g { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
-.dot-p { width: 7px; height: 7px; border-radius: 50%; background: var(--purple); }
-.dot-b { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
-.dot-pk { width: 7px; height: 7px; border-radius: 50%; background: var(--pink); }
-.card-rank {
-  font-size: 30px;
-  font-weight: 900;
-  letter-spacing: -1px;
-  color: var(--text);
-  line-height: 1;
-  margin-bottom: 5px;
-}
+.card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; }
+.card-label { font-size: 11px; color: var(--muted); font-weight: 500; margin-bottom: 7px; display: flex; align-items: center; gap: 5px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; }
+.card-rank { font-size: 32px; font-weight: 900; letter-spacing: -1px; color: var(--text); line-height: 1; margin-bottom: 5px; }
 .card-rank.green { color: var(--green); }
 .card-delta { font-size: 11px; color: var(--muted); }
 .up   { color: var(--green) !important; }
 .down { color: var(--red)   !important; }
 
-/* ── Controls Bar ── */
+/* ── Controls ── */
 .controls {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 1rem;
 }
-.filters { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
-.filter-group { display: flex; align-items: center; gap: 6px; }
-.filter-label { font-size: 11px; color: var(--muted); font-weight: 500; }
-.tabs { display: flex; gap: 3px; }
+.filters { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.filter-group { display: flex; align-items: center; gap: 5px; }
+.filter-label { font-size: 11px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+.tabs { display: flex; gap: 3px; flex-wrap: wrap; }
 .tab {
-  padding: 4px 11px;
-  border-radius: 20px;
-  font-size: 12px;
-  border: 1px solid var(--border);
-  background: var(--white);
-  cursor: pointer;
-  color: #555;
-  font-family: inherit;
-  font-weight: 400;
-  transition: all 0.12s;
-  white-space: nowrap;
+  padding: 4px 11px; border-radius: 20px; font-size: 12px;
+  border: 1px solid var(--border); background: var(--white);
+  cursor: pointer; color: #555; font-family: inherit;
+  transition: all .12s; white-space: nowrap;
 }
 .tab.active { background: #111; color: #fff; border-color: #111; font-weight: 500; }
 .tab:hover:not(.active) { background: #f0f0ee; }
 
-/* 시간 단위 토글 */
 .view-toggle { display: flex; gap: 3px; }
 .vtab {
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  border: 1px solid var(--border);
-  background: var(--white);
-  cursor: pointer;
-  color: #555;
-  font-family: inherit;
-  transition: all 0.12s;
+  padding: 4px 12px; border-radius: 6px; font-size: 12px;
+  border: 1px solid var(--border); background: var(--white);
+  cursor: pointer; color: #555; font-family: inherit; transition: all .12s;
 }
 .vtab.active { background: var(--green); color: #fff; border-color: var(--green); font-weight: 500; }
 
-/* ── Chart Section ── */
+/* ── Chart ── */
 .chart-box {
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 1.4rem;
+  padding: 1.25rem 1.4rem;
   margin-bottom: 1rem;
 }
 .chart-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 1.1rem;
+  margin-bottom: 1rem;
   flex-wrap: wrap;
   gap: 8px;
 }
@@ -185,60 +122,39 @@ main { max-width: 1000px; margin: 0 auto; padding: 1.5rem; }
 .chart-title { font-size: 15px; font-weight: 700; }
 .live-badge {
   display: inline-flex; align-items: center; gap: 4px;
-  background: var(--red-bg);
-  color: var(--red);
+  background: #fff0f0; color: var(--red);
   font-size: 10px; font-weight: 700;
   padding: 2px 8px; border-radius: 20px;
-  border: 1px solid #ffcccc;
-  letter-spacing: 0.05em;
+  border: 1px solid #ffcccc; letter-spacing: .05em;
 }
-.live-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--red);
-  animation: blink 1.4s infinite;
-}
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-
-.legend { display: flex; flex-wrap: wrap; gap: 12px; }
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); animation: blink 1.4s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; }
 .leg { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
-.leg-line {
-  width: 18px; height: 3px; border-radius: 2px;
-}
+.leg-line { width: 18px; height: 3px; border-radius: 2px; }
 
-.chart-wrap { position: relative; height: 320px; }
+.chart-wrap { position: relative; height: 340px; }
 
-/* ── Notes ── */
-.notes { font-size: 11px; color: #bbb; line-height: 2.2; }
-
-/* ── Loading / Error ── */
+/* ── Notes / Loading / Error ── */
+.notes { font-size: 11px; color: #c0c0bc; line-height: 2.2; }
 #loading { text-align: center; padding: 5rem; color: var(--muted); font-size: 13px; }
-#error-box {
-  display: none;
-  background: var(--red-bg);
-  border: 1px solid #fcc;
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.2rem;
-  font-size: 13px;
-  color: #a32d2d;
-}
+#error-box { display: none; background: #fff0f0; border: 1px solid #fcc; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.2rem; font-size: 13px; color: #a32d2d; }
 
-@media (max-width: 640px) {
-  .cards { grid-template-columns: repeat(2, 1fr); }
-  header { padding: 1rem; }
-  main { padding: 1rem; }
+@media (max-width: 700px) {
+  .cards { grid-template-columns: repeat(2,1fr); }
+  header, main { padding-left: 1rem; padding-right: 1rem; }
 }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-left">
-    <h1>🏆 올리브영 랭킹 추이 — 리필드 제품</h1>
-    <div class="sub">채널 생성일 2025-10-27 ~ 현재 &nbsp;·&nbsp; Slack 자동 연동</div>
+  <div>
+    <div class="h-title">🏆 올리브영 랭킹 추이 — 리필드 제품</div>
+    <div class="h-sub">채널 생성일 2025-10-27 ~ 현재 &nbsp;·&nbsp; Slack 자동 연동</div>
   </div>
-  <div class="header-right">
-    <span class="status" id="status">슬랙 최신 데이터 확인 중…</span>
+  <div class="h-right">
+    <span id="status">슬랙 최신 데이터 확인 중…</span>
     <button class="btn-refresh" onclick="loadData()">🔄 지금 업데이트</button>
   </div>
 </header>
@@ -248,32 +164,29 @@ main { max-width: 1000px; margin: 0 auto; padding: 1.5rem; }
   <div id="loading">⏳ 슬랙 최신 데이터 확인 중…</div>
 
   <div id="dashboard" style="display:none">
-
-    <!-- 카드 4개 -->
     <div class="cards">
       <div class="card">
-        <div class="card-label"><span class="dot-g"></span>부스터 · 헤어케어</div>
+        <div class="card-label"><span class="dot" style="background:var(--green)"></span>부스터 · 헤어케어</div>
         <div class="card-rank green" id="c-bh">—</div>
         <div class="card-delta" id="d-bh"></div>
       </div>
       <div class="card">
-        <div class="card-label"><span class="dot-p"></span>아이래쉬 · 메이크업</div>
+        <div class="card-label"><span class="dot" style="background:var(--purple)"></span>아이래쉬 · 메이크업</div>
         <div class="card-rank" id="c-lm">—</div>
         <div class="card-delta" id="d-lm"></div>
       </div>
       <div class="card">
-        <div class="card-label"><span class="dot-b"></span>부스터 · 전체</div>
+        <div class="card-label"><span class="dot" style="background:var(--blue)"></span>부스터 · 전체</div>
         <div class="card-rank" id="c-bt">—</div>
         <div class="card-delta" id="d-bt"></div>
       </div>
       <div class="card">
-        <div class="card-label"><span class="dot-pk"></span>아이래쉬 · 전체</div>
+        <div class="card-label"><span class="dot" style="background:var(--pink)"></span>아이래쉬 · 전체</div>
         <div class="card-rank" id="c-lt">—</div>
         <div class="card-delta" id="d-lt"></div>
       </div>
     </div>
 
-    <!-- 컨트롤 바 -->
     <div class="controls">
       <div class="filters">
         <div class="filter-group">
@@ -298,14 +211,12 @@ main { max-width: 1000px; margin: 0 auto; padding: 1.5rem; }
           </div>
         </div>
       </div>
-      <!-- 시간 단위 토글 -->
       <div class="view-toggle" id="view-toggle">
         <button class="vtab active" data-view="daily">일별</button>
         <button class="vtab" data-view="3h">3시간</button>
       </div>
     </div>
 
-    <!-- 차트 -->
     <div class="chart-box">
       <div class="chart-head">
         <div class="chart-title-row">
@@ -315,12 +226,12 @@ main { max-width: 1000px; margin: 0 auto; padding: 1.5rem; }
         <div class="legend">
           <div class="leg"><div class="leg-line" style="background:var(--green)"></div>부스터 · 헤어케어</div>
           <div class="leg"><div class="leg-line" style="background:var(--purple)"></div>아이래쉬 · 메이크업</div>
-          <div class="leg"><div class="leg-line" style="background:var(--blue);opacity:.7" ></div>부스터 · 전체</div>
+          <div class="leg"><div class="leg-line" style="background:var(--blue);opacity:.7"></div>부스터 · 전체</div>
           <div class="leg"><div class="leg-line" style="background:var(--pink);opacity:.7"></div>아이래쉬 · 전체</div>
         </div>
       </div>
       <div class="chart-wrap">
-        <canvas id="mainChart" role="img" aria-label="리필드 올리브영 랭킹 추이"></canvas>
+        <canvas id="mainChart" role="img" aria-label="리필드 올리브영 랭킹 추이 차트"></canvas>
       </div>
     </div>
 
@@ -330,7 +241,6 @@ main { max-width: 1000px; margin: 0 auto; padding: 1.5rem; }
       <p>※ 파일을 열 때 자동 최신화 · 매 시간 자동 갱신</p>
       <p>※ 데이터 출처: Slack #1132-ct-growth-md-올리브영랭킹</p>
     </div>
-
   </div>
 </main>
 
@@ -338,9 +248,9 @@ main { max-width: 1000px; margin: 0 auto; padding: 1.5rem; }
 const DATA_URL = "./data.json";
 let allRecs = [];
 let chartInst = null;
-let pFilter = "all";   // product
-let mFilter = "all";   // month
-let viewMode = "daily"; // daily | 3h
+let pFilter = "all";
+let mFilter = "all";
+let viewMode = "daily";
 
 /* ── 파싱 ── */
 function parseMessages(msgs) {
@@ -350,12 +260,10 @@ function parseMessages(msgs) {
     if (!t.includes("올리브영 랭킹")) continue;
     const ts = parseFloat(m.ts);
     const d  = new Date(new Date(ts * 1000).toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
-
     let bh = null, lm = null, bt = null, lt = null;
 
     const hM = t.match(/헤어케어[\s\S]*?\*(\d+)위\*/);
     if (hM) bh = +hM[1];
-
     const mM = t.match(/메이크업[\s\S]*?\*(\d+)위\*/);
     if (mM) lm = +mM[1];
 
@@ -374,22 +282,21 @@ function parseMessages(msgs) {
   return recs.sort((a, b) => a.ts - b.ts);
 }
 
-/* ── 집계 헬퍼 ── */
-function best(arr) { return arr.length ? Math.min(...arr.filter(v => v !== null)) : null; }
+/* ── 집계 ── */
+function best(arr) { const v = arr.filter(x => x !== null); return v.length ? Math.min(...v) : null; }
 
 function aggregateDaily(recs) {
   const map = {};
   for (const r of recs) {
     const key = r.d.getFullYear() + "-" + String(r.d.getMonth()+1).padStart(2,"0") + "-" + String(r.d.getDate()).padStart(2,"0");
     if (!map[key]) map[key] = { bh:[], lm:[], bt:[], lt:[], key };
-    if (r.bh) map[key].bh.push(r.bh);
-    if (r.lm) map[key].lm.push(r.lm);
-    if (r.bt) map[key].bt.push(r.bt);
-    if (r.lt) map[key].lt.push(r.lt);
+    if (r.bh != null) map[key].bh.push(r.bh);
+    if (r.lm != null) map[key].lm.push(r.lm);
+    if (r.bt != null) map[key].bt.push(r.bt);
+    if (r.lt != null) map[key].lt.push(r.lt);
   }
-  return Object.values(map).sort((a,b) => a.key > b.key ? 1 : -1).map(g => ({
-    label: g.key.slice(5),   // MM-DD
-    bh: best(g.bh), lm: best(g.lm), bt: best(g.bt), lt: best(g.lt)
+  return Object.values(map).sort((a,b)=>a.key>b.key?1:-1).map(g=>({
+    label: g.key.slice(5), bh: best(g.bh), lm: best(g.lm), bt: best(g.bt), lt: best(g.lt)
   }));
 }
 
@@ -399,30 +306,37 @@ function aggregate3h(recs) {
     const slot = Math.floor(r.d.getHours() / 3) * 3;
     const key  = r.d.getFullYear() + "-" + String(r.d.getMonth()+1).padStart(2,"0") + "-" + String(r.d.getDate()).padStart(2,"0") + "T" + String(slot).padStart(2,"0");
     if (!map[key]) map[key] = { bh:[], lm:[], bt:[], lt:[], key };
-    if (r.bh) map[key].bh.push(r.bh);
-    if (r.lm) map[key].lm.push(r.lm);
-    if (r.bt) map[key].bt.push(r.bt);
-    if (r.lt) map[key].lt.push(r.lt);
+    if (r.bh != null) map[key].bh.push(r.bh);
+    if (r.lm != null) map[key].lm.push(r.lm);
+    if (r.bt != null) map[key].bt.push(r.bt);
+    if (r.lt != null) map[key].lt.push(r.lt);
   }
-  return Object.values(map).sort((a,b) => a.key > b.key ? 1 : -1).map(g => {
-    const parts = g.key.split("T");
-    const md = parts[0].slice(5);
-    const h  = parts[1];
-    return {
-      label: md + " " + h + "시",
-      bh: best(g.bh), lm: best(g.lm), bt: best(g.bt), lt: best(g.lt)
-    };
+  return Object.values(map).sort((a,b)=>a.key>b.key?1:-1).map(g=>{
+    const [dt, h] = g.key.split("T");
+    return { label: dt.slice(5)+" "+h+"시", bh:best(g.bh), lm:best(g.lm), bt:best(g.bt), lt:best(g.lt) };
   });
 }
 
-/* ── 필터 적용 ── */
+/* ── 필터 ── */
 function getFiltered() {
-  let recs = allRecs;
-  if (mFilter !== "all") {
-    const mo = parseInt(mFilter);
-    recs = recs.filter(r => r.d.getMonth()+1 === mo);
+  if (mFilter === "all") return allRecs;
+  const mo = parseInt(mFilter);
+  return allRecs.filter(r => r.d.getMonth()+1 === mo);
+}
+
+/* ── Y축 범위 동적 계산 ── */
+function calcYRange(agg, showB, showL) {
+  const vals = [];
+  for (const a of agg) {
+    if (showB) { if (a.bh != null) vals.push(a.bh); if (a.bt != null) vals.push(a.bt); }
+    if (showL) { if (a.lm != null) vals.push(a.lm); if (a.lt != null) vals.push(a.lt); }
   }
-  return recs;
+  if (!vals.length) return { min: 1, max: 50 };
+  const worst = Math.max(...vals);
+  // 최악 순위보다 20% 여유, 최소 10위 범위 확보, 5 단위로 올림
+  const raw = Math.max(worst * 1.2, Math.min(...vals) + 10);
+  const max = Math.ceil(raw / 5) * 5;
+  return { min: 1, max };
 }
 
 /* ── 차트 렌더 ── */
@@ -431,18 +345,20 @@ function renderChart() {
   const agg   = viewMode === "daily" ? aggregateDaily(recs) : aggregate3h(recs);
   const showB = pFilter === "all" || pFilter === "booster";
   const showL = pFilter === "all" || pFilter === "lash";
+  const { min, max } = calcYRange(agg, showB, showL);
 
-  const labels = agg.map(a => a.label);
-  const sparse = agg.length > 60;
+  const labels  = agg.map(a => a.label);
+  const sparse  = agg.length > 60;
+  const pRadius = sparse ? 0 : 4;
 
   const datasets = [];
   if (showB) {
-    datasets.push({ label:"부스터·헤어케어", data: agg.map(a=>a.bh), borderColor:"#00b87a", backgroundColor:"rgba(0,184,122,0.07)", fill:true,  tension:0.35, borderWidth:2.5, pointRadius: sparse?0:4, pointBackgroundColor:"#00b87a", pointBorderColor:"#fff", pointBorderWidth:2, spanGaps:false });
-    datasets.push({ label:"부스터·전체",     data: agg.map(a=>a.bt), borderColor:"#3a8ef6", borderDash:[5,4], backgroundColor:"transparent", fill:false, tension:0.35, borderWidth:1.5, pointRadius: sparse?0:2, spanGaps:false });
+    datasets.push({ label:"부스터·헤어케어", data:agg.map(a=>a.bh), borderColor:"#00b87a", backgroundColor:"rgba(0,184,122,0.07)", fill:true,  tension:0.35, borderWidth:2.5, pointRadius:pRadius, pointBackgroundColor:"#00b87a", pointBorderColor:"#fff", pointBorderWidth:2, spanGaps:false });
+    datasets.push({ label:"부스터·전체",     data:agg.map(a=>a.bt), borderColor:"#3a8ef6", borderDash:[5,4], backgroundColor:"transparent",       fill:false, tension:0.35, borderWidth:1.5, pointRadius:sparse?0:2, spanGaps:false });
   }
   if (showL) {
-    datasets.push({ label:"아이래쉬·메이크업", data: agg.map(a=>a.lm), borderColor:"#7c6ff7", backgroundColor:"rgba(124,111,247,0.05)", fill:true,  tension:0.35, borderWidth:2.5, pointRadius: sparse?0:4, pointBackgroundColor:"#7c6ff7", pointBorderColor:"#fff", pointBorderWidth:2, spanGaps:false });
-    datasets.push({ label:"아이래쉬·전체",   data: agg.map(a=>a.lt), borderColor:"#e05c8a", borderDash:[5,4], backgroundColor:"transparent", fill:false, tension:0.35, borderWidth:1.5, pointRadius: sparse?0:2, spanGaps:false });
+    datasets.push({ label:"아이래쉬·메이크업", data:agg.map(a=>a.lm), borderColor:"#7c6ff7", backgroundColor:"rgba(124,111,247,0.05)", fill:true,  tension:0.35, borderWidth:2.5, pointRadius:pRadius, pointBackgroundColor:"#7c6ff7", pointBorderColor:"#fff", pointBorderWidth:2, spanGaps:false });
+    datasets.push({ label:"아이래쉬·전체",   data:agg.map(a=>a.lt), borderColor:"#e05c8a", borderDash:[5,4], backgroundColor:"transparent",       fill:false, tension:0.35, borderWidth:1.5, pointRadius:sparse?0:2, spanGaps:false });
   }
 
   if (chartInst) chartInst.destroy();
@@ -454,32 +370,32 @@ function renderChart() {
       interaction: { mode: "index", intersect: false },
       plugins: {
         legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => ctx.parsed.y !== null ? " " + ctx.dataset.label + ": " + ctx.parsed.y + "위" : null
-          }
-        }
+        tooltip: { callbacks: { label: ctx => ctx.parsed.y != null ? " " + ctx.dataset.label + ": " + ctx.parsed.y + "위" : null } }
       },
       scales: {
         y: {
-          reverse: true, min: 1,
-          title: { display: true, text: "순위 (낮을수록 좋음)", font:{size:11}, color:"#bbb" },
+          reverse: false,          // 1위 = 아래, 높은 숫자(낮은 순위) = 위
+          min,
+          max,
+          title: { display: true, text: "순위 (낮을수록 좋음 ↓)", font:{size:11}, color:"#bbb" },
           grid: { color: "rgba(0,0,0,0.04)" },
-          ticks: { color: "#bbb", font:{size:11}, stepSize: 10 }
+          ticks: {
+            color: "#bbb", font:{size:11},
+            callback: v => v + "위"
+          }
         },
         x: {
           grid: { display: false },
-          ticks: { color: "#bbb", font:{size:10}, autoSkip:true, maxTicksLimit: viewMode==="daily" ? 20 : 12, maxRotation:30 }
+          ticks: { color: "#bbb", font:{size:10}, autoSkip:true, maxTicksLimit: viewMode==="daily"?20:14, maxRotation:30 }
         }
       }
     }
   });
 
-  // 차트 제목
-  const prodLabel   = pFilter==="all" ? "부스터 & 아이래쉬" : (pFilter==="booster" ? "부스터" : "아이래쉬");
-  const periodLabel = mFilter==="all" ? "전체 기간" : mFilter+"월";
-  const viewLabel   = viewMode==="daily" ? "일별" : "3시간";
-  document.getElementById("chart-title").textContent = prodLabel + " — " + periodLabel + " (" + viewLabel + ")";
+  const prodL   = pFilter==="all" ? "부스터 & 아이래쉬" : (pFilter==="booster" ? "부스터" : "아이래쉬");
+  const periodL = mFilter==="all" ? "전체 기간" : mFilter+"월";
+  const viewL   = viewMode==="daily" ? "일별" : "3시간";
+  document.getElementById("chart-title").textContent = prodL + " — " + periodL + " (" + viewL + ")";
 }
 
 /* ── 카드 ── */
@@ -487,13 +403,13 @@ function setCard(s, cur, prv) {
   const re = document.getElementById("c-"+s);
   const de = document.getElementById("d-"+s);
   if (!re) return;
-  re.textContent = cur !== null ? cur + "위" : "—";
+  re.textContent = cur != null ? cur+"위" : "—";
   if (!de) return;
-  if (cur !== null && prv !== null) {
+  if (cur != null && prv != null) {
     const diff = prv - cur;
-    if (diff > 0)      { de.textContent = "▲ "+diff+"계단 상승"; de.className="card-delta up"; }
-    else if (diff < 0) { de.textContent = "▼ "+Math.abs(diff)+"계단 하락"; de.className="card-delta down"; }
-    else               { de.textContent = "변동 없음"; de.className="card-delta"; }
+    if (diff > 0)      { de.textContent="▲ "+diff+"계단 상승"; de.className="card-delta up"; }
+    else if (diff < 0) { de.textContent="▼ "+Math.abs(diff)+"계단 하락"; de.className="card-delta down"; }
+    else               { de.textContent="변동 없음"; de.className="card-delta"; }
   } else de.textContent = "";
 }
 function renderCards() {
@@ -510,7 +426,7 @@ function renderCards() {
   }
 }
 
-/* ── 데이터 로드 ── */
+/* ── 로드 ── */
 async function loadData() {
   document.getElementById("status").textContent = "슬랙 최신 데이터 확인 중…";
   try {
@@ -535,24 +451,18 @@ async function loadData() {
 /* ── 이벤트 ── */
 document.getElementById("product-tabs").addEventListener("click", e => {
   if (!e.target.classList.contains("tab")) return;
-  document.querySelectorAll("#product-tabs .tab").forEach(t => t.classList.remove("active"));
-  e.target.classList.add("active");
-  pFilter = e.target.dataset.val;
-  renderChart();
+  document.querySelectorAll("#product-tabs .tab").forEach(t=>t.classList.remove("active"));
+  e.target.classList.add("active"); pFilter = e.target.dataset.val; renderChart();
 });
 document.getElementById("period-tabs").addEventListener("click", e => {
   if (!e.target.classList.contains("tab")) return;
-  document.querySelectorAll("#period-tabs .tab").forEach(t => t.classList.remove("active"));
-  e.target.classList.add("active");
-  mFilter = e.target.dataset.val;
-  renderChart();
+  document.querySelectorAll("#period-tabs .tab").forEach(t=>t.classList.remove("active"));
+  e.target.classList.add("active"); mFilter = e.target.dataset.val; renderChart();
 });
 document.getElementById("view-toggle").addEventListener("click", e => {
   if (!e.target.classList.contains("vtab")) return;
-  document.querySelectorAll(".vtab").forEach(t => t.classList.remove("active"));
-  e.target.classList.add("active");
-  viewMode = e.target.dataset.view;
-  renderChart();
+  document.querySelectorAll(".vtab").forEach(t=>t.classList.remove("active"));
+  e.target.classList.add("active"); viewMode = e.target.dataset.view; renderChart();
 });
 
 loadData();
